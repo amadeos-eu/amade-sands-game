@@ -1,0 +1,73 @@
+# The vehicles of Sands. Change a number, start the game again, play.
+#
+#   health    hit points
+#   armour    the part of every hit it shrugs off: 0.3 takes 70 % of the damage
+#   speed     tiles per second on sand and rock; on dunes three quarters of it
+#   sight     how far it sees, in tiles: the fog of war lifts around it
+#   size      its radius in tiles: how close others may come, and what a rocket's burst must reach
+#   cost      credits, paid while it is made
+#   seconds   how long the factory takes at full power
+#   needs     the buildings its side must have before the factory makes it
+#   weapon    gun or rocket; then its range (tiles), damage, reload (seconds), shot (how fast the shell
+#             or the rocket flies, in tiles per second) and, for a rocket, splash (the radius of its burst
+#             in tiles)
+#   turret    yes if the gun turns on its own; else the whole vehicle turns to fire
+#   capacity  credits of crystal a harvester carries
+
+unit trike
+  health 100
+  armour 0.1
+  speed 3.4
+  sight 5
+  size 0.28
+  cost 150
+  seconds 8
+  needs factory
+  weapon gun
+  range 3.2
+  damage 9
+  reload 0.5
+  shot 18
+
+unit tank
+  health 320
+  armour 0.35
+  speed 1.8
+  sight 4
+  size 0.36
+  cost 300
+  seconds 14
+  needs factory
+  weapon gun
+  range 4
+  damage 34
+  reload 1.6
+  shot 16
+  turret yes
+
+unit launcher
+  health 170
+  armour 0.15
+  speed 1.6
+  sight 5
+  size 0.36
+  cost 450
+  seconds 18
+  needs factory outpost
+  weapon rocket
+  range 7
+  damage 44
+  reload 3.2
+  shot 9
+  splash 0.9
+
+unit harvester
+  health 450
+  armour 0.3
+  speed 1.3
+  sight 3
+  size 0.46
+  cost 300
+  seconds 16
+  needs factory refinery
+  capacity 700
