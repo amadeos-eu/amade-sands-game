@@ -35,26 +35,26 @@ public final class Field {
     public static final double LOW_POWER = 0.5;
     /** A building sold brings back this part of its price. */
     public static final double REFUND = 0.5;
-    /** Credits a harvester takes from the spice in a second, and puts into the refinery. */
+    /** Credits a harvester takes from the crystal in a second, and puts into the refinery. */
     public static final double HARVEST_RATE = 30;
     public static final double UNLOAD_RATE = 120;
-    /** How far a harvester looks for spice, in tiles. */
-    public static final int SPICE_SEARCH = 24;
+    /** How far a harvester looks for crystal, in tiles. */
+    public static final int CRYSTAL_SEARCH = 24;
     /** The same side is told of an attack again only after this many seconds. */
     public static final double ALARM_SECONDS = 15;
-    /** How fast the carryall flies, in units per second. */
-    public static final double CARRYALL_SPEED = 90;
+    /** How fast the airlifter flies, in units per second. */
+    public static final double AIRLIFTER_SPEED = 90;
     /** Rockets land within this many tiles of their aim. */
     public static final double SCATTER = 0.5;
 
-    /** The worm: its speed in units per second, how far it smells a unit on the sand, in tiles. */
-    public static final double WORM_SPEED = 26;
-    public static final double WORM_SMELL = 12;
-    /** Seconds before the first worm shows, and that it stays under the sand after a meal. */
-    public static final double WORM_FIRST = 90;
-    public static final double WORM_DIVE = 45;
+    /** The burrower: its speed in units per second, how far it smells a unit on the sand, in tiles. */
+    public static final double BURROWER_SPEED = 26;
+    public static final double BURROWER_SMELL = 12;
+    /** Seconds before the first burrower shows, and that it stays under the sand after a meal. */
+    public static final double BURROWER_FIRST = 90;
+    public static final double BURROWER_DIVE = 45;
     /** It swallows a unit this close, in units. */
-    public static final double WORM_BITE = 8;
+    public static final double BURROWER_BITE = 8;
 
     private Field() {
     }

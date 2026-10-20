@@ -10,7 +10,7 @@ public enum Task {
     ATTACK,
     /** Driving to a place and fighting everything it meets on the way: the computer's attacks. */
     HUNT,
-    /** A harvester on its way to the spice, or taking it in. */
+    /** A harvester on its way to the crystal, or taking it in. */
     HARVEST,
     /** A harvester driving to a refinery with its load. */
     RETURN,

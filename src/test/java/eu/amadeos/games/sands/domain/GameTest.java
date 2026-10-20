@@ -93,25 +93,25 @@ class GameTest {
 
     // --8<-- [start:test-harvest]
     @Test
-    void aHarvesterFillsUpOnTheSpiceAndBringsItHome() {
+    void aHarvesterFillsUpOnTheCrystalAndBringsItHome() {
         Game game = mission(1);
         Unit harvester = of(game, Side.BLUE, "harvester").getFirst();
         House house = game.house(Side.BLUE);
         house.credits.pay(1000);
         int credits = house.credits();
-        int spice = 0;
-        for (int row = 0; row < 64; row++) for (int col = 0; col < 64; col++) spice += game.spice(col, row);
+        int crystal = 0;
+        for (int row = 0; row < 64; row++) for (int col = 0; col < 64; col++) crystal += game.crystal(col, row);
         List<Event> events = run(game, 90);
         Event.Unloaded unloaded = (Event.Unloaded) events.stream().filter(e -> e instanceof Event.Unloaded)
                 .findFirst().orElseThrow();
         assertEquals(harvester, unloaded.harvester());
         assertEquals(credits + 700, house.credits(), "a full load, 700 credits");
         int left = 0;
-        for (int row = 0; row < 64; row++) for (int col = 0; col < 64; col++) left += game.spice(col, row);
+        for (int row = 0; row < 64; row++) for (int col = 0; col < 64; col++) left += game.crystal(col, row);
         int taken = 0;
         for (Side side : Side.values()) taken += game.house(side).harvested();
         for (Unit unit : game.units()) taken += unit.load();
-        assertEquals(spice - taken, left, "taken from the ground, none made up");
+        assertEquals(crystal - taken, left, "taken from the ground, none made up");
     }
     // --8<-- [end:test-harvest]
 
@@ -144,7 +144,7 @@ class GameTest {
         assertEquals(12, deployed.unit().cell().row(), "below the factory's door");
         assertTrue(game.house(Side.BLUE).credits() <= credits - 300 + 700, "paid, whatever the harvester brought");
 
-        // Four more factories use more power than the windtrap makes: half speed.
+        // Four more factories use more power than the turbine makes: half speed.
         for (int i = 0; i < 4; i++) game.add(RULES.building("factory"), Side.BLUE, 20 + 5 * i, 40);
         game.account();
         assertTrue(game.house(Side.BLUE).lowPower());
@@ -162,7 +162,7 @@ class GameTest {
         House house = game.house(Side.BLUE);
         assertEquals(Game.Placement.NOT_READY, game.place(Side.BLUE, 10, 2));
         house.yard.keep(silo);
-        assertEquals(Game.Placement.OK, game.placement(Side.BLUE, silo, 10, 2), "on rock beside the windtrap");
+        assertEquals(Game.Placement.OK, game.placement(Side.BLUE, silo, 10, 2), "on rock beside the turbine");
         assertEquals(Game.Placement.TOO_FAR, game.placement(Side.BLUE, silo, 14, 2), "rock, but too far away");
         assertEquals(Game.Placement.OCCUPIED, game.placement(Side.BLUE, silo, 4, 4), "on the yard");
         Cell sand = sand(game, 20, 6);
@@ -178,16 +178,16 @@ class GameTest {
     // --8<-- [end:test-place]
 
     @Test
-    void aNewRefineryComesWithAHarvesterByCarryall() {
+    void aNewRefineryComesWithAHarvesterByAirlifter() {
         Game game = mission(1);
         game.house(Side.BLUE).yard.keep(RULES.building("refinery"));
         assertEquals(Game.Placement.OK, game.place(Side.BLUE, 10, 2));
-        assertEquals(1, game.carryalls().size());
+        assertEquals(1, game.airlifters().size());
         int before = of(game, Side.BLUE, "harvester").size();
         List<Event> events = run(game, 20);
         assertTrue(events.stream().anyMatch(e -> e instanceof Event.Deployed d && d.unit().type().harvests()));
         assertEquals(before + 1, of(game, Side.BLUE, "harvester").size());
-        assertTrue(game.carryalls().isEmpty(), "and flew off again");
+        assertTrue(game.airlifters().isEmpty(), "and flew off again");
     }
 
     // --8<-- [start:test-fight]
@@ -224,42 +224,42 @@ class GameTest {
     @Test
     void anEnemyBuildingOnceSeenStaysOnTheMapUntilItIsSeenGone() {
         Game game = mission(1);
-        Building windtrap = first(game, Side.RED, "windtrap");
-        assertFalse(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == windtrap.id()), "far off, unseen");
-        Unit scout = vehicle(game, "trike", Side.BLUE, windtrap.col() - 4, windtrap.row() + 1);
+        Building turbine = first(game, Side.RED, "turbine");
+        assertFalse(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == turbine.id()), "far off, unseen");
+        Unit scout = vehicle(game, "trike", Side.BLUE, turbine.col() - 4, turbine.row() + 1);
         run(game, 0.1);
-        assertTrue(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == windtrap.id()), "found");
+        assertTrue(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == turbine.id()), "found");
         scout.health = 0;
         run(game, 0.1);
-        windtrap.health = 0;                              // destroyed while nobody of blue looks
+        turbine.health = 0;                              // destroyed while nobody of blue looks
         run(game, 0.1);
-        assertTrue(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == windtrap.id()), "still a ghost");
-        vehicle(game, "trike", Side.BLUE, windtrap.col() - 4, windtrap.row() + 1);
+        assertTrue(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == turbine.id()), "still a ghost");
+        vehicle(game, "trike", Side.BLUE, turbine.col() - 4, turbine.row() + 1);
         run(game, 0.1);
-        assertFalse(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == windtrap.id()), "seen gone");
+        assertFalse(game.house(Side.BLUE).known().stream().anyMatch(g -> g.id() == turbine.id()), "seen gone");
     }
     // --8<-- [end:test-ghosts]
 
-    // --8<-- [start:test-worm]
+    // --8<-- [start:test-burrower]
     @Test
-    void theWormSwallowsVehiclesOnTheSandButNotOnRock() {
+    void theBurrowerSwallowsVehiclesOnTheSandButNotOnRock() {
         Game game = mission(2);
-        game.time = Field.WORM_FIRST - 1;
+        game.time = Field.BURROWER_FIRST - 1;
         Cell open = sand(game, 24, 30);
         Unit onSand = vehicle(game, "trike", Side.BLUE, open.col(), open.row());
         game.stop(List.of(onSand));
         run(game, 1.1);
-        assertNotNull(game.worm());
-        game.worm.x = onSand.x() + 40;
-        game.worm.y = onSand.y();
+        assertNotNull(game.burrower());
+        game.burrower.x = onSand.x() + 40;
+        game.burrower.y = onSand.y();
         Unit onRock = vehicle(game, "trike", Side.BLUE, 12, 34);
         List<Event> events = run(game, 10);
-        assertTrue(events.stream().anyMatch(e -> e instanceof Event.WormAte ate && ate.unit() == onSand));
+        assertTrue(events.stream().anyMatch(e -> e instanceof Event.BurrowerAte ate && ate.unit() == onSand));
         assertFalse(onSand.alive());
         assertTrue(onRock.alive());
-        assertFalse(game.worm().up(), "it dives after a meal");
+        assertFalse(game.burrower().up(), "it dives after a meal");
     }
-    // --8<-- [end:test-worm]
+    // --8<-- [end:test-burrower]
 
     @Test
     void aSideWithoutBuildingsHasLost() {
@@ -279,7 +279,7 @@ class GameTest {
         long placed = events.stream().filter(e -> e instanceof Event.Placed p && p.building().side() == Side.RED).count();
         assertTrue(placed >= 5, "it built " + placed);
         assertTrue(game.commander(Side.RED).wave() >= 1, "and attacked");
-        assertTrue(game.house(Side.RED).harvested() > 2000, "with spice it harvested");
+        assertTrue(game.house(Side.RED).harvested() > 2000, "with crystal it harvested");
         assertTrue(game.units().stream().anyMatch(u -> u.side() == Side.RED && u.task() == Task.HUNT)
                 || game.buildings().stream().anyMatch(b -> b.side() == Side.BLUE && b.health() < b.maxHealth()),
                 "its army is out hunting, or has found the base");

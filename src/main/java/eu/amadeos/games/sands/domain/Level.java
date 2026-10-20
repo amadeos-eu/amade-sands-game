@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * A mission's map as drawn in Tiled, with the tileset {@code tiles.tsx}. The tile layer {@code ground}
- * holds the sand, dunes, rock, cliffs and spice by their tiles' classes ({@link Ground}); the object layer
+ * holds the sand, dunes, rock, cliffs and crystal by their tiles' classes ({@link Ground}); the object layer
  * {@code things} holds what stands there at the start: an object whose class names a building of
  * {@code buildings.txt} (its top left corner on the tile where the building starts) or a vehicle of
  * {@code units.txt} (on its tile), with the property {@code side}, {@code blue} or {@code red}. Each side

@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * A whole battle as the values of a save file, and back: every vehicle with its task and its load, every
- * building, the shells and rockets in flight, the spice left, the worm, both houses with their credits,
+ * building, the shells and rockets in flight, the crystal left, the burrower, both houses with their credits,
  * queues and what they have seen, the commanders' plans, and the random generator where it stood. The map
  * itself is not saved, only its mission's number: the map comes from the game, as at the start.
  *
@@ -34,7 +34,7 @@ public final class Archive {
         w.put("time", game.time).put("thought", game.thought).put("next", game.nextId);
         w.put("phase", game.phase).put("winner", game.winner == null ? "none" : game.winner.id());
         w.put("seed", game.random.seed()).put("random", game.random.state());
-        w.put("spice", spice(game.spice));
+        w.put("crystal", crystal(game.crystal));
         for (House house : game.houses.values()) house(w.child("house." + house.side().id()), house);
         for (Commander commander : game.commanders.values()) {
             w.add("commander").put("side", commander.side().id()).put("attack", commander.nextAttack)
@@ -65,15 +65,15 @@ public final class Archive {
                     .put("toX", s.toX).put("toY", s.toY).put("angle", s.angle).put("left", s.left)
                     .put("flight", s.flight);
         }
-        w.list("carryall");
-        for (Carryall c : game.carryalls) {
-            w.add("carryall").put("side", c.side.id()).put("x", c.x).put("y", c.y).put("angle", c.angle)
+        w.list("airlifter");
+        for (Airlifter c : game.airlifters) {
+            w.add("airlifter").put("side", c.side.id()).put("x", c.x).put("y", c.y).put("angle", c.angle)
                     .put("toX", c.toX).put("toY", c.toY).put("homeX", c.homeX).put("homeY", c.homeY)
                     .put("cargo", c.cargo == null ? "none" : c.cargo.id());
         }
-        if (game.worm != null) {
-            Worm m = game.worm;
-            w.child("worm").put("x", m.x).put("y", m.y).put("angle", m.angle).put("up", m.up).put("timer", m.timer)
+        if (game.burrower != null) {
+            Burrower m = game.burrower;
+            w.child("burrower").put("x", m.x).put("y", m.y).put("angle", m.angle).put("up", m.up).put("timer", m.timer)
                     .put("prey", m.prey).put("toX", m.toX).put("toY", m.toY).put("sniff", m.sniff)
                     .put("meals", m.meals);
         }
@@ -120,10 +120,10 @@ public final class Archive {
         throw new IllegalStateException("a weapon of nothing");
     }
 
-    /** The spice of every tile, a byte each (a tile holds at most 255), as Base64. */
-    private static String spice(int[] spice) {
-        byte[] bytes = new byte[spice.length];
-        for (int i = 0; i < spice.length; i++) bytes[i] = (byte) Math.min(255, spice[i]);
+    /** The crystal of every tile, a byte each (a tile holds at most 255), as Base64. */
+    private static String crystal(int[] crystal) {
+        byte[] bytes = new byte[crystal.length];
+        for (int i = 0; i < crystal.length; i++) bytes[i] = (byte) Math.min(255, crystal[i]);
         return Base64.getEncoder().encodeToString(bytes);
     }
 
@@ -143,11 +143,11 @@ public final class Archive {
         game.phase = r.choice("phase", Game.Phase.class);
         String winner = r.text("winner");
         game.winner = winner.equals("none") ? null : Side.ofId(winner);
-        int[] spice = new int[game.spice.length];
-        byte[] bytes = Base64.getDecoder().decode(r.text("spice"));
-        if (bytes.length != spice.length) throw new Snapshot.SnapshotException("the spice is not of this map");
-        for (int i = 0; i < spice.length; i++) spice[i] = bytes[i] & 0xFF;
-        game.restoreSpice(spice);
+        int[] crystal = new int[game.crystal.length];
+        byte[] bytes = Base64.getDecoder().decode(r.text("crystal"));
+        if (bytes.length != crystal.length) throw new Snapshot.SnapshotException("the crystal is not of this map");
+        for (int i = 0; i < crystal.length; i++) crystal[i] = bytes[i] & 0xFF;
+        game.restoreCrystal(crystal);
         for (Snapshot.Reader c : commanders) {
             Commander commander = game.commanders.get(side(c, "side"));
             commander.nextAttack = c.number("attack");
@@ -193,27 +193,27 @@ public final class Archive {
             shot.flight = s.number("flight");
             game.shots.add(shot);
         }
-        for (Snapshot.Reader c : r.list("carryall")) {
+        for (Snapshot.Reader c : r.list("airlifter")) {
             String cargo = c.text("cargo");
-            Carryall carryall = new Carryall(side(c, "side"), c.number("homeX"), c.number("homeY"), c.number("toX"),
+            Airlifter airlifter = new Airlifter(side(c, "side"), c.number("homeX"), c.number("homeY"), c.number("toX"),
                     c.number("toY"), cargo.equals("none") ? null : rules.unit(cargo));
-            carryall.x = carryall.lastX = c.number("x");
-            carryall.y = carryall.lastY = c.number("y");
-            carryall.angle = c.number("angle");
-            game.carryalls.add(carryall);
+            airlifter.x = airlifter.lastX = c.number("x");
+            airlifter.y = airlifter.lastY = c.number("y");
+            airlifter.angle = c.number("angle");
+            game.airlifters.add(airlifter);
         }
-        if (r.has("worm.x")) {
-            Snapshot.Reader m = r.child("worm");
-            Worm worm = new Worm(m.number("x"), m.number("y"));
-            worm.angle = worm.lastAngle = m.number("angle");
-            worm.up = m.bool("up");
-            worm.timer = m.number("timer");
-            worm.prey = m.integer("prey");
-            worm.toX = m.number("toX");
-            worm.toY = m.number("toY");
-            worm.sniff = m.number("sniff");
-            worm.meals = m.integer("meals");
-            game.worm = worm;
+        if (r.has("burrower.x")) {
+            Snapshot.Reader m = r.child("burrower");
+            Burrower burrower = new Burrower(m.number("x"), m.number("y"));
+            burrower.angle = burrower.lastAngle = m.number("angle");
+            burrower.up = m.bool("up");
+            burrower.timer = m.number("timer");
+            burrower.prey = m.integer("prey");
+            burrower.toX = m.number("toX");
+            burrower.toY = m.number("toY");
+            burrower.sniff = m.number("sniff");
+            burrower.meals = m.integer("meals");
+            game.burrower = burrower;
         }
         game.account();
         for (House house : game.houses.values()) house(r.child("house." + house.side().id()), house, rules);

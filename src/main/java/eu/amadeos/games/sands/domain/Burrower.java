@@ -3,10 +3,10 @@ package eu.amadeos.games.sands.domain;
 import eu.amadeos.gameengine.math.Angles;
 
 /**
- * The sand worm: it moves under the open sand, smells the vehicles on it, and swallows them whole. Then
+ * The sand burrower: it moves under the open sand, smells the vehicles on it, and swallows them whole. Then
  * it dives, and comes up again somewhere else. It cannot cross rock: on rock, a vehicle is safe.
  */
-public final class Worm {
+public final class Burrower {
     double x;
     double y;
     double lastX;
@@ -23,7 +23,7 @@ public final class Worm {
     double sniff;
     int meals;
 
-    Worm(double x, double y) {
+    Burrower(double x, double y) {
         this.x = x;
         this.y = y;
         this.lastX = x;

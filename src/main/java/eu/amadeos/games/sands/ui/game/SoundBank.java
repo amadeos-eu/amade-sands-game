@@ -38,8 +38,8 @@ final class SoundBank {
     /** The base is attacked: a siren, up and down twice. */
     final Sound alarm = Sound.tone(Wave.SQUARE, 440, 660, 0.25, 0.05).then(Sound.tone(Wave.SQUARE, 660, 440, 0.25, 0.05))
             .then(Sound.tone(Wave.SQUARE, 440, 660, 0.25, 0.05)).then(Sound.tone(Wave.SQUARE, 660, 440, 0.25, 0.05));
-    /** The worm comes up: a deep rumble under hissing sand. */
-    final Sound worm = Sound.mix(Sound.tone(Wave.NOISE, 0, 0, 1.4, 0.1),
+    /** The burrower comes up: a deep rumble under hissing sand. */
+    final Sound burrower = Sound.mix(Sound.tone(Wave.NOISE, 0, 0, 1.4, 0.1),
             Sound.tone(Wave.TRIANGLE, 45, 30, 1.4, 0.45));
     /** A vehicle answers an order. */
     final Sound yes = Sound.tone(Wave.SQUARE, 523, 523, 0.04, 0.04).then(Sound.tone(Wave.SQUARE, 784, 784, 0.06, 0.04));

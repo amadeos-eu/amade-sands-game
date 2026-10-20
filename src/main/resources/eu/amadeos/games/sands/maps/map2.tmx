@@ -75,7 +75,7 @@
     <property name="side" value="blue"/>
    </properties>
   </object>
-  <object id="2" type="windtrap" x="144" y="432" width="32" height="32">
+  <object id="2" type="turbine" x="144" y="432" width="32" height="32">
    <properties>
     <property name="side" value="blue"/>
    </properties>
@@ -110,7 +110,7 @@
     <property name="side" value="red"/>
    </properties>
   </object>
-  <object id="9" type="windtrap" x="976" y="432" width="32" height="32">
+  <object id="9" type="turbine" x="976" y="432" width="32" height="32">
    <properties>
     <property name="side" value="red"/>
    </properties>

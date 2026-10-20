@@ -111,10 +111,10 @@ Architecture: all
 Depends: openjdk-25-jre | java-runtime (>= 25)
 Maintainer: amadeOS Project <developers@datazuul.com>
 Description: Real-time strategy game for amadeOS
- Harvest spice on a desert planet, build a base of windtraps, refineries
+ Harvest crystal on a desert planet, build a base of turbines, refineries
  and factories, and send tanks, trikes and rocket launchers against the
  computer's base. Select units with the mouse, give orders, fight in the
- fog of war, watch out for the sand worm. Three missions from the Tiled
+ fog of war, watch out for the sand burrower. Three missions from the Tiled
  editor; the whole battle can be saved. Part of the amadeOS games.
 """
 
@@ -181,7 +181,7 @@ tasks.register('windowsInstaller') {
                     // MSI versions are numeric only: 0.1.0-SNAPSHOT becomes 0.1.0
                     '--app-version', project.version.toString().replaceAll(/[^0-9.].*$/, ''),
                     '--vendor', 'datazuul',
-                    '--description', 'Harvest spice, build a base and defeat the enemy on a desert planet',
+                    '--description', 'Harvest crystal, build a base and defeat the enemy on a desert planet',
                     '--copyright', 'datazuul, licensed under the EUPL-1.2',
                     '--input', inputDir.absolutePath,
                     '--main-jar', jar.archiveFile.get().asFile.name,

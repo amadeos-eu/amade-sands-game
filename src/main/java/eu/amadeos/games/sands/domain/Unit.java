@@ -22,7 +22,7 @@ public final class Unit implements Thing {
     double lastTurret;
     double health;
     Task task = Task.IDLE;
-    /** Where it drives: its slot, the spice it goes to; {@code null} for nowhere. */
+    /** Where it drives: its slot, the crystal it goes to; {@code null} for nowhere. */
     Cell goal;
     /** Where its group was sent: the flow field all of them follow. */
     Cell way;
@@ -32,14 +32,14 @@ public final class Unit implements Thing {
     int target;
     double reload;
     double sinceShot = Double.MAX_VALUE;
-    /** The credits of spice it carries, and the part of a credit taken in or put out so far. */
+    /** The credits of crystal it carries, and the part of a credit taken in or put out so far. */
     int load;
     double work;
-    /** The spice it last harvested, to go back to after unloading. */
+    /** The crystal it last harvested, to go back to after unloading. */
     Cell field;
     /** Seconds it has hardly moved while it meant to. */
     double stuck;
-    /** Whether it moved in the last step, and is taking in spice. */
+    /** Whether it moved in the last step, and is taking in crystal. */
     boolean moving;
     boolean harvesting;
 

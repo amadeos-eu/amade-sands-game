@@ -24,13 +24,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The desert of a mission: dunes with ripples, rock with cracks and the cliffs' shadows, scree at the foot of
- * the rock, and the spice. Every pixel is worked out on its own, from noise and from the tiles of the map,
+ * the rock, and the crystal. Every pixel is worked out on its own, from noise and from the tiles of the map,
  * with light from the top left: that is what makes the ground look like sand and stone, and it takes a
  * while, a second or two for a whole map. So it is done on other threads, in squares of {@value #CHUNK} ×
  * {@value #CHUNK} tiles, and a square shows the tiles' plain colours until its picture is ready.
  *
- * <p>The spice is harvested, so it changes. Each square keeps its ground without spice and the colour the
- * spice would have on each pixel, both lit already; when the spice under a square changes by a step, the
+ * <p>The crystal is harvested, so it changes. Each square keeps its ground without crystal and the colour the
+ * crystal would have on each pixel, both lit already; when the crystal under a square changes by a step, the
  * two are mixed again, which is quick, and still done on another thread.
  */
 // --8<-- [start:terrain]
@@ -38,7 +38,7 @@ final class Terrain {
     static final int CHUNK = 8;
     /** Pixels for each unit of the world: the ground is as sharp on a screen of twice the logical size. */
     static final int PIXELS = 2;
-    /** The steps of spice on a tile that the ground shows: harvesting changes the picture now and then, not in every step. */
+    /** The steps of crystal on a tile that the ground shows: harvesting changes the picture now and then, not in every step. */
     static final int STEPS = 16;
     private static final int SIZE = CHUNK * Field.TILE;
     private static final int SIDE = SIZE * PIXELS;
@@ -63,16 +63,16 @@ final class Terrain {
     private Game game;
     private int version;
 
-    /** One square: its ground without spice, and the picture with the spice as it was last mixed in. */
+    /** One square: its ground without crystal, and the picture with the crystal as it was last mixed in. */
     private static final class Chunk {
         final int col;
         final int row;
         Future<?> work;
-        /** Ground and spice, lit; and how much of the spice's colour each pixel may take. */
+        /** Ground and crystal, lit; and how much of the crystal's colour each pixel may take. */
         volatile int[] ground;
-        volatile int[] spice;
+        volatile int[] crystal;
         volatile float[] weight;
-        /** The spice on the square and a tile around it, in steps: as mixed in, and as asked for. */
+        /** The crystal on the square and a tile around it, in steps: as mixed in, and as asked for. */
         byte[] mixed;
         byte[] wanted;
         final AtomicReference<BufferedImage> ready = new AtomicReference<>();
@@ -105,8 +105,8 @@ final class Terrain {
         plain[Ground.DUNE.ordinal()] = new Color(0xE0B06C);
         plain[Ground.ROCK.ordinal()] = new Color(0x84644A);
         plain[Ground.CLIFF.ordinal()] = new Color(0x5E4432);
-        plain[Ground.SPICE.ordinal()] = new Color(0xC86A2C);
-        plain[Ground.THICK.ordinal()] = new Color(0xA8501E);
+        plain[Ground.CRYSTAL.ordinal()] = new Color(0x4A9A90);
+        plain[Ground.THICK.ordinal()] = new Color(0x2E7C78);
         chunks = new Chunk[across * down];
         for (int i = 0; i < chunks.length; i++) chunks[i] = new Chunk(i % across * CHUNK, i / across * CHUNK);
     }
@@ -114,45 +114,45 @@ final class Terrain {
 
     // --8<-- [start:update]
     /**
-     * After every step: a square whose spice has changed by a step is mixed again. The same terrain serves
+     * After every step: a square whose crystal has changed by a step is mixed again. The same terrain serves
      * every game on its map, the title's and the player's, so a new game is a change, too.
      */
     void update(Game game) {
-        boolean changed = game != this.game || game.spiceVersion() != version;
+        boolean changed = game != this.game || game.crystalVersion() != version;
         this.game = game;
-        version = game.spiceVersion();
+        version = game.crystalVersion();
         for (Chunk chunk : chunks) {
-            if (changed) chunk.wanted = spice(game, chunk);
+            if (changed) chunk.wanted = crystal(game, chunk);
             boolean idle = chunk.work == null || chunk.work.isDone();
             if (idle && !Arrays.equals(chunk.mixed, chunk.wanted)) schedule(chunk);
         }
     }
     // --8<-- [end:update]
 
-    /** The spice on a square and a tile around it, in steps. */
-    private byte[] spice(Game game, Chunk chunk) {
+    /** The crystal on a square and a tile around it, in steps. */
+    private byte[] crystal(Game game, Chunk chunk) {
         byte[] steps = new byte[(CHUNK + 2) * (CHUNK + 2)];
         int i = 0;
         for (int row = chunk.row - 1; row <= chunk.row + CHUNK; row++) {
             for (int col = chunk.col - 1; col <= chunk.col + CHUNK; col++) {
-                steps[i++] = (byte) (level.contains(col, row) ? step(game.spice(col, row)) : 0);
+                steps[i++] = (byte) (level.contains(col, row) ? step(game.crystal(col, row)) : 0);
             }
         }
         return steps;
     }
 
-    static int step(int spice) {
-        if (spice <= 0) return 0;
-        return Math.clamp(Math.round(spice * (float) STEPS / Ground.THICK.spice()), 1, STEPS);
+    static int step(int crystal) {
+        if (crystal <= 0) return 0;
+        return Math.clamp(Math.round(crystal * (float) STEPS / Ground.THICK.crystal()), 1, STEPS);
     }
 
     private void schedule(Chunk chunk) {
-        byte[] spice = chunk.wanted != null ? chunk.wanted : new byte[(CHUNK + 2) * (CHUNK + 2)];
-        if (chunk.wanted == null) chunk.wanted = spice;
+        byte[] crystal = chunk.wanted != null ? chunk.wanted : new byte[(CHUNK + 2) * (CHUNK + 2)];
+        if (chunk.wanted == null) chunk.wanted = crystal;
         chunk.work = WORKERS.submit(() -> {
             if (chunk.ground == null) draw(chunk);
-            BufferedImage image = mix(chunk, spice);
-            chunk.mixed = spice;
+            BufferedImage image = mix(chunk, crystal);
+            chunk.mixed = crystal;
             chunk.ready.set(image);
         });
     }
@@ -187,7 +187,7 @@ final class Terrain {
         }
     }
 
-    /** Whether every square shows its picture with the spice as it is: for the tests. */
+    /** Whether every square shows its picture with the crystal as it is: for the tests. */
     boolean settled() {
         for (Chunk chunk : chunks) {
             if (chunk.shown == null || chunk.ready.get() != null || !Arrays.equals(chunk.mixed, chunk.wanted)) {
@@ -254,7 +254,7 @@ final class Terrain {
         return tiles[row * level.width() + col];
     }
 
-    /** The edges of the rock and the spice frayed by noise, so that they do not follow the tiles. */
+    /** The edges of the rock and the crystal frayed by noise, so that they do not follow the tiles. */
     private static double warpX(double wx, double wy) {
         return wx + (Art.fbm(wx / 22.0, wy / 22.0, 51) - 0.5) * 18;
     }
@@ -269,7 +269,7 @@ final class Terrain {
     }
 
     // --8<-- [start:draw]
-    /** A square's ground, without the spice, and the spice's colour on it: the slow part. */
+    /** A square's ground, without the crystal, and the crystal's colour on it: the slow part. */
     private void draw(Chunk chunk) {
         int w = SIDE + 2 * BORDER;
         double[] height = new double[w * w];
@@ -297,7 +297,7 @@ final class Terrain {
         }
         // --8<-- [end:draw]
         int[] ground = new int[SIDE * SIDE];
-        int[] spice = new int[SIDE * SIDE];
+        int[] crystal = new int[SIDE * SIDE];
         float[] weight = new float[SIDE * SIDE];
         Random random = new Random(chunk.col * 7919L + chunk.row * 104729L + level.number());
         double lx = -0.55;
@@ -340,26 +340,28 @@ final class Terrain {
                     rocky = Art.mix(rocky, random.nextBoolean() ? 0x4A3424 : 0xB8946A, random.nextDouble() * 0.16);
                     col = Art.mix(col, rocky, r);
                 }
-                int spiced = Art.mix(0xB8561E, 0xD8762E, Art.fbm(wx / 9.0, wy / 9.0, 9));
+                // Crystal: teal shards, some dark, some glinting.
+                int shards = Art.mix(0x2E8478, 0x4CB4A8, Art.fbm(wx / 9.0, wy / 9.0, 9));
                 double grain = random.nextDouble();
-                if (grain < 0.16) spiced = Art.mix(spiced, 0x7A2C0C, 0.7);
-                else if (grain > 0.93) spiced = Art.mix(spiced, 0xF0A050, 0.6);
+                if (grain < 0.16) shards = Art.mix(shards, 0x14444A, 0.7);
+                else if (grain > 0.95) shards = Art.mix(shards, 0xD8FFF6, 0.8);
+                else if (grain > 0.88) shards = Art.mix(shards, 0x8CE8DC, 0.6);
                 int o = y * SIDE + x;
                 ground[o] = Art.shade(col, light);
-                spice[o] = Art.shade(spiced, light);
+                crystal[o] = Art.shade(shards, light);
                 weight[o] = (float) ((0.55 + 0.45 * Art.fbm(wx / 20.0, wy / 20.0, 37)) * (1 - r));
             }
         }
-        chunk.spice = spice;
+        chunk.crystal = crystal;
         chunk.weight = weight;
         chunk.ground = ground;
     }
 
     // --8<-- [start:mix]
-    /** The square's picture with the spice in {@code steps}: the ground and the spice's colour mixed, pixel by pixel. */
+    /** The square's picture with the crystal in {@code steps}: the ground and the crystal's colour mixed, pixel by pixel. */
     private BufferedImage mix(Chunk chunk, byte[] steps) {
         int[] ground = chunk.ground;
-        int[] spice = chunk.spice;
+        int[] crystal = chunk.crystal;
         float[] weight = chunk.weight;
         float[] amount = new float[(CHUNK + 2) * (CHUNK + 2)];
         for (int i = 0; i < amount.length; i++) amount[i] = steps[i] / (float) STEPS;
@@ -378,7 +380,7 @@ final class Terrain {
                     double wy = y0 + y / (double) PIXELS;
                     double s = local(amount, warpX(wx, wy) - x0, warpY(wx, wy) - y0);
                     double cover = Art.smooth(0.06, 0.2, s) * (0.75 + 0.25 * Art.smooth(0.2, 0.9, s));
-                    if (cover > 0) col = Art.mix(col, spice[i], cover * weight[i]);
+                    if (cover > 0) col = Art.mix(col, crystal[i], cover * weight[i]);
                 }
                 out[y * width + x] = col;
             }
@@ -388,7 +390,7 @@ final class Terrain {
     }
     // --8<-- [end:mix]
 
-    /** The spice field inside a square, at {@code x}, {@code y} units from its top left corner. */
+    /** The crystal field inside a square, at {@code x}, {@code y} units from its top left corner. */
     private static double local(float[] amount, double x, double y) {
         double fx = x / Field.TILE + 0.5;
         double fy = y / Field.TILE + 0.5;

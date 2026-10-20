@@ -96,12 +96,12 @@ public final class Commander {
 
     // --8<-- [start:next]
     /**
-     * The first building of the plan of which it has fewer than the plan names up to there; first a windtrap
+     * The first building of the plan of which it has fewer than the plan names up to there; first a turbine
      * if the power would not last. After the plan, turrets.
      */
     BuildingType nextBuilding(Game game, House house) {
-        BuildingType windtrap = null;
-        for (BuildingType type : plan.build()) if (type.power() > 0) windtrap = type;
+        BuildingType turbine = null;
+        for (BuildingType type : plan.build()) if (type.power() > 0) turbine = type;
         int spare = house.powerMade() - house.powerUsed();
         List<BuildingType> wanted = new ArrayList<>(plan.build());
         BuildingType turret = turret(game);
@@ -111,12 +111,12 @@ public final class Commander {
             int planned = 0;
             for (int j = 0; j <= i; j++) if (wanted.get(j) == type) planned++;
             if (game.count(side, type) >= planned || !game.available(side, type)) continue;
-            if (type.power() < 0 && spare + type.power() < 0 && windtrap != null && game.available(side, windtrap)) {
-                return windtrap;
+            if (type.power() < 0 && spare + type.power() < 0 && turbine != null && game.available(side, turbine)) {
+                return turbine;
             }
             return type;
         }
-        return spare < 0 && windtrap != null && game.available(side, windtrap) ? windtrap : null;
+        return spare < 0 && turbine != null && game.available(side, turbine) ? turbine : null;
     }
     // --8<-- [end:next]
 
@@ -139,7 +139,7 @@ public final class Commander {
             if (unit.type().harvests()) harvesters++;
             else army++;
         }
-        for (Carryall carryall : game.carryalls()) if (carryall.side() == side && carryall.cargo() != null) harvesters++;
+        for (Airlifter airlifter : game.airlifters()) if (airlifter.side() == side && airlifter.cargo() != null) harvesters++;
         if (harvesters < refineries * plan.harvesters() && game.available(side, harvester)) return harvester;
         if (army >= ARMY) return null;
         for (int i = 0; i < plan.mix().size(); i++) {

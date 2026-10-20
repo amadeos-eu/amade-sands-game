@@ -25,15 +25,15 @@ class RulesTest {
         assertFalse(rules.yard().buildable(), "the map places the yard; nobody builds it");
         assertTrue(rules.building("factory").factory());
         assertTrue(rules.building("outpost").radar());
-        assertEquals(100, rules.building("windtrap").power());
+        assertEquals(100, rules.building("turbine").power());
         assertTrue(rules.building("refinery").power() < 0, "every other building uses power");
         assertEquals(Weapon.Kind.ROCKET, rules.unit("launcher").weapon().kind());
         assertTrue(rules.unit("launcher").weapon().splash() > 0);
         assertNull(rules.harvester().weapon(), "the harvester is unarmed");
         assertEquals(3, rules.missions());
-        assertFalse(rules.mission(1).worm());
-        assertTrue(rules.mission(2).worm());
-        assertEquals("windtrap", rules.plan().build().getFirst().id());
+        assertFalse(rules.mission(1).burrower());
+        assertTrue(rules.mission(2).burrower());
+        assertEquals("turbine", rules.plan().build().getFirst().id());
     }
 
     @Test
@@ -54,7 +54,7 @@ class RulesTest {
 
         List<TextData.Line> plan = TextData.parse("commander.txt", new StringReader("""
                 plan computer
-                  build windtrap palace
+                  build turbine palace
                   mix tank
                   harvesters 1
                 """));

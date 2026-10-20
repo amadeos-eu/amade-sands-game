@@ -1,9 +1,9 @@
 # How the computer builds its base: the buildings in order. It builds the first one of which it has
-# fewer than the list names up to there, so a lost building is built again; a windtrap comes first
+# fewer than the list names up to there, so a lost building is built again; a turbine comes first
 # whenever the power would not last. After the list it builds turrets, up to the mission's number.
 # The army is made of the vehicles in the order of mix, again and again.
 
 plan computer
-  build windtrap refinery outpost factory windtrap refinery silo windtrap factory
+  build turbine refinery outpost factory turbine refinery silo turbine factory
   mix tank tank trike launcher tank launcher
   harvesters 2

@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A battle on a mission's map: the two houses, their buildings and vehicles, the shots, the spice, the worm
- * and the carryalls, and the rules of each step. It knows nothing of the screen; the player's orders come
+ * A battle on a mission's map: the two houses, their buildings and vehicles, the shots, the crystal, the burrower
+ * and the airlifters, and the rules of each step. It knows nothing of the screen; the player's orders come
  * in through its methods, the computer's from its {@link Commander}s, and what happened goes out as
  * {@link Event}s. Everything that happens by chance comes from one seeded generator, and nothing depends
  * on the order of a hash map, so a battle saved and loaded goes on exactly as it would have.
@@ -47,16 +47,16 @@ public final class Game {
     final List<Unit> units = new ArrayList<>();
     final List<Building> buildings = new ArrayList<>();
     final List<Shot> shots = new ArrayList<>();
-    final List<Carryall> carryalls = new ArrayList<>();
-    Worm worm;
+    final List<Airlifter> airlifters = new ArrayList<>();
+    Burrower burrower;
     /** Every thing by its id; only looked up, never walked through, so its order does not matter. */
     private final Map<Integer, Thing> things = new HashMap<>();
     private final Map<Cell, Cell> approaches = new HashMap<>();
     /** The building on each tile, 0 for none; and whether the tile is its wall, not its pad. */
     private final int[] occupant;
     private final boolean[] wall;
-    final int[] spice;
-    private int spiceVersion;
+    final int[] crystal;
+    private int crystalVersion;
     private int version;
     private final FieldCache fields;
     final EnumMap<Side, House> houses = new EnumMap<>(Side.class);
@@ -82,9 +82,9 @@ public final class Game {
         this.random = new SeededRandom(seed);
         this.occupant = new int[width * height];
         this.wall = new boolean[width * height];
-        this.spice = new int[width * height];
+        this.crystal = new int[width * height];
         for (int row = 0; row < height; row++) {
-            for (int col = 0; col < width; col++) spice[row * width + col] = level.ground(col, row).spice();
+            for (int col = 0; col < width; col++) crystal[row * width + col] = level.ground(col, row).crystal();
         }
         this.fields = new FieldCache(width, height, this::open);
         this.crowd = new Grid<>(width * Field.TILE, height * Field.TILE, 2 * Field.TILE);
@@ -147,13 +147,13 @@ public final class Game {
         return Collections.unmodifiableList(shots);
     }
 
-    public List<Carryall> carryalls() {
-        return Collections.unmodifiableList(carryalls);
+    public List<Airlifter> airlifters() {
+        return Collections.unmodifiableList(airlifters);
     }
 
-    /** The worm, or {@code null} before it shows or on a mission without one. */
-    public Worm worm() {
-        return worm;
+    /** The burrower, or {@code null} before it shows or on a mission without one. */
+    public Burrower burrower() {
+        return burrower;
     }
 
     public House house(Side side) {
@@ -170,14 +170,14 @@ public final class Game {
         return things.get(id);
     }
 
-    /** The credits of spice left on a tile. */
-    public int spice(int col, int row) {
-        return contains(col, row) ? spice[row * width + col] : 0;
+    /** The credits of crystal left on a tile. */
+    public int crystal(int col, int row) {
+        return contains(col, row) ? crystal[row * width + col] : 0;
     }
 
-    /** Changes whenever spice is taken: the ground is drawn again then. */
-    public int spiceVersion() {
-        return spiceVersion;
+    /** Changes whenever crystal is taken: the ground is drawn again then. */
+    public int crystalVersion() {
+        return crystalVersion;
     }
 
     /** Changes whenever a building goes up or comes down. */
@@ -294,7 +294,7 @@ public final class Game {
         if (!unarmed.isEmpty()) move(unarmed, cellOf(enemy.x(), enemy.y()));
     }
 
-    /** Harvesters go to the spice at {@code field}, or the nearest there is for {@code null}; others drive there. */
+    /** Harvesters go to the crystal at {@code field}, or the nearest there is for {@code null}; others drive there. */
     public void harvest(Collection<Unit> group, Cell field) {
         List<Unit> others = new ArrayList<>();
         for (Unit unit : group) {
@@ -306,7 +306,7 @@ public final class Game {
             release(unit);
             unit.task = Task.HARVEST;
             unit.field = field;
-            unit.goal = field != null && spice(field.col(), field.row()) > 0 ? field : null;
+            unit.goal = field != null && crystal(field.col(), field.row()) > 0 ? field : null;
             unit.stuck = 0;
         }
         if (!others.isEmpty() && field != null) move(others, field);
@@ -475,8 +475,8 @@ public final class Game {
         for (Unit unit : units) unit.remember();
         for (Building building : buildings) building.lastTurret = building.turret;
         for (Shot shot : shots) shot.remember();
-        for (Carryall carryall : carryalls) carryall.remember();
-        if (worm != null) worm.remember();
+        for (Airlifter airlifter : airlifters) airlifter.remember();
+        if (burrower != null) burrower.remember();
 
         produce(seconds);
         thought += seconds;
@@ -489,7 +489,7 @@ public final class Game {
         for (Building building : buildings) defend(building, seconds);
         fly(seconds);
         carry(seconds);
-        if (level.mission().worm()) worm(seconds);
+        if (level.mission().burrower()) burrower(seconds);
         bury();
         look();
         judge();
@@ -769,7 +769,7 @@ public final class Game {
     // --8<-- [start:separate]
     /**
      * Vehicles that overlap push each other apart, the moving ones more than those that stand: a group
-     * spreads out instead of driving into one point, and a harvester at work is not shoved off its spice.
+     * spreads out instead of driving into one point, and a harvester at work is not shoved off its crystal.
      */
     private void separate() {
         crowd.clear();
@@ -804,7 +804,7 @@ public final class Game {
     }
 
     // --8<-- [start:harvest]
-    /** A harvester takes in spice where it stands, or looks for the nearest; full, it drives home. */
+    /** A harvester takes in crystal where it stands, or looks for the nearest; full, it drives home. */
     private void harvest(Unit unit, double seconds) {
         unit.harvesting = false;
         if (unit.load >= unit.type().capacity()) {
@@ -816,22 +816,22 @@ public final class Game {
         int i = here.row() * width + here.col();
         boolean there = unit.goal == null || Math.abs(unit.goal.col() - here.col()) <= 1
                 && Math.abs(unit.goal.row() - here.row()) <= 1;
-        if (spice[i] > 0 && there) {
+        if (crystal[i] > 0 && there) {
             unit.harvesting = true;
             unit.field = here;
             unit.work += Field.HARVEST_RATE * seconds;
-            int take = Math.min(Math.min((int) unit.work, spice[i]), unit.type().capacity() - unit.load);
+            int take = Math.min(Math.min((int) unit.work, crystal[i]), unit.type().capacity() - unit.load);
             if (take > 0) {
                 unit.work -= take;
-                spice[i] -= take;
+                crystal[i] -= take;
                 unit.load += take;
-                spiceVersion++;
+                crystalVersion++;
             }
-            if (spice[i] == 0) unit.goal = null;
+            if (crystal[i] == 0) unit.goal = null;
             return;
         }
-        if (unit.goal == null || spice(unit.goal.col(), unit.goal.row()) == 0) {
-            unit.goal = findSpice(unit.field != null ? unit.field : here, unit);
+        if (unit.goal == null || crystal(unit.goal.col(), unit.goal.row()) == 0) {
+            unit.goal = findCrystal(unit.field != null ? unit.field : here, unit);
             if (unit.goal == null) {
                 if (unit.load > 0) unit.task = Task.RETURN;
                 else settle(unit);
@@ -839,17 +839,17 @@ public final class Game {
             }
         }
         if (drive(unit, unit.goal, seconds)) {
-            if (spice(unit.goal.col(), unit.goal.row()) == 0 || unit.stuck > 1.5) unit.goal = null;
+            if (crystal(unit.goal.col(), unit.goal.row()) == 0 || unit.stuck > 1.5) unit.goal = null;
             unit.stuck = 0;
         }
     }
     // --8<-- [end:harvest]
 
     /**
-     * The nearest tile with spice, counted in steps from {@code from}, that no other harvester of the side is
+     * The nearest tile with crystal, counted in steps from {@code from}, that no other harvester of the side is
      * going to; one that another is going to if there is no other.
      */
-    private Cell findSpice(Cell from, Unit harvester) {
+    private Cell findCrystal(Cell from, Unit harvester) {
         boolean[] seen = new boolean[width * height];
         ArrayDeque<Cell> queue = new ArrayDeque<>();
         queue.add(from);
@@ -857,7 +857,7 @@ public final class Game {
         Cell shared = null;
         while (!queue.isEmpty()) {
             Cell cell = queue.poll();
-            if (spice[cell.row() * width + cell.col()] > 0) {
+            if (crystal[cell.row() * width + cell.col()] > 0) {
                 if (!taken(cell, harvester)) return cell;
                 if (shared == null) shared = cell;
             }
@@ -865,7 +865,7 @@ public final class Game {
                 int c = cell.col() + DX[d];
                 int r = cell.row() + DY[d];
                 if (!contains(c, r) || seen[r * width + c] || !open(c, r)) continue;
-                if (Math.max(Math.abs(c - from.col()), Math.abs(r - from.row())) > Field.SPICE_SEARCH) continue;
+                if (Math.max(Math.abs(c - from.col()), Math.abs(r - from.row())) > Field.CRYSTAL_SEARCH) continue;
                 seen[r * width + c] = true;
                 queue.add(new Cell(c, r));
             }
@@ -913,7 +913,7 @@ public final class Game {
     }
 
     // --8<-- [start:unload]
-    /** On the pad, the spice goes into the refinery; what the storage cannot hold is lost. */
+    /** On the pad, the crystal goes into the refinery; what the storage cannot hold is lost. */
     private void unload(Unit unit, double seconds) {
         Building refinery = null;
         for (Building building : buildings) if (building.docked == unit.id()) refinery = building;
@@ -1052,42 +1052,42 @@ public final class Game {
     }
     // --8<-- [end:hurt]
 
-    /** The carryalls fly in, set their harvester down at the refinery, and fly back off the map. */
+    /** The airlifters fly in, set their harvester down at the refinery, and fly back off the map. */
     private void carry(double seconds) {
-        for (Iterator<Carryall> it = carryalls.iterator(); it.hasNext(); ) {
-            Carryall carryall = it.next();
-            double dx = carryall.toX - carryall.x;
-            double dy = carryall.toY - carryall.y;
+        for (Iterator<Airlifter> it = airlifters.iterator(); it.hasNext(); ) {
+            Airlifter airlifter = it.next();
+            double dx = airlifter.toX - airlifter.x;
+            double dy = airlifter.toY - airlifter.y;
             double d = Math.hypot(dx, dy);
-            double step = Field.CARRYALL_SPEED * seconds;
-            carryall.angle = Math.atan2(dy, dx);
+            double step = Field.AIRLIFTER_SPEED * seconds;
+            airlifter.angle = Math.atan2(dy, dx);
             if (d > step) {
-                carryall.x += dx / d * step;
-                carryall.y += dy / d * step;
+                airlifter.x += dx / d * step;
+                airlifter.y += dy / d * step;
                 continue;
             }
-            carryall.x = carryall.toX;
-            carryall.y = carryall.toY;
-            if (carryall.cargo == null) {
+            airlifter.x = airlifter.toX;
+            airlifter.y = airlifter.toY;
+            if (airlifter.cargo == null) {
                 it.remove();
                 continue;
             }
-            Cell drop = cellOf(carryall.x, carryall.y);
+            Cell drop = cellOf(airlifter.x, airlifter.y);
             List<Cell> slots = Formation.slots(drop, 1, width, height, this::open);
             if (!slots.isEmpty()) {
                 Cell slot = slots.getFirst();
-                Unit unit = add(carryall.cargo, carryall.side, (slot.col() + 0.5) * Field.TILE,
-                        (slot.row() + 0.5) * Field.TILE, carryall.angle);
+                Unit unit = add(airlifter.cargo, airlifter.side, (slot.col() + 0.5) * Field.TILE,
+                        (slot.row() + 0.5) * Field.TILE, airlifter.angle);
                 if (unit.type().harvests()) unit.task = Task.HARVEST;
                 events.add(new Event.Deployed(unit));
             }
-            carryall.cargo = null;
-            carryall.toX = carryall.homeX;
-            carryall.toY = carryall.homeY;
+            airlifter.cargo = null;
+            airlifter.toX = airlifter.homeX;
+            airlifter.toY = airlifter.homeY;
         }
     }
 
-    /** A new refinery's harvester comes by carryall, from the edge of the map nearest to it. */
+    /** A new refinery's harvester comes by airlifter, from the edge of the map nearest to it. */
     private void fly(Building refinery) {
         double x = refinery.dockX();
         double y = refinery.dockY();
@@ -1097,84 +1097,84 @@ public final class Game {
         double[][] edges = {{-out, y, x}, {w + out, y, w - x}, {x, -out, y}, {x, h + out, h - y}};
         double[] from = edges[0];
         for (double[] edge : edges) if (edge[2] < from[2]) from = edge;
-        carryalls.add(new Carryall(refinery.side(), from[0], from[1], x, y, rules.harvester()));
+        airlifters.add(new Airlifter(refinery.side(), from[0], from[1], x, y, rules.harvester()));
     }
 
-    // --8<-- [start:worm]
+    // --8<-- [start:burrower]
     /**
-     * The worm hunts the nearest vehicle on the sand, harvesters above all, for they shake the ground; with
+     * The burrower hunts the nearest vehicle on the sand, harvesters above all, for they shake the ground; with
      * none in reach it wanders. It turns away from rock. A vehicle in its mouth is gone; then it dives, and
      * comes up again far away.
      */
-    private void worm(double seconds) {
-        if (worm == null) {
-            if (time < Field.WORM_FIRST) return;
+    private void burrower(double seconds) {
+        if (burrower == null) {
+            if (time < Field.BURROWER_FIRST) return;
             Cell cell = sandFarFromAll();
             if (cell == null) return;
-            worm = new Worm((cell.col() + 0.5) * Field.TILE, (cell.row() + 0.5) * Field.TILE);
+            burrower = new Burrower((cell.col() + 0.5) * Field.TILE, (cell.row() + 0.5) * Field.TILE);
             wander();
-            events.add(new Event.WormRose(worm.x, worm.y));
+            events.add(new Event.BurrowerRose(burrower.x, burrower.y));
             return;
         }
-        if (!worm.up) {
-            worm.timer -= seconds;
-            if (worm.timer > 0) return;
+        if (!burrower.up) {
+            burrower.timer -= seconds;
+            if (burrower.timer > 0) return;
             Cell cell = sandFarFromAll();
             if (cell == null) {
-                worm.timer = 5;
+                burrower.timer = 5;
                 return;
             }
-            worm.x = worm.lastX = (cell.col() + 0.5) * Field.TILE;
-            worm.y = worm.lastY = (cell.row() + 0.5) * Field.TILE;
-            worm.up = true;
+            burrower.x = burrower.lastX = (cell.col() + 0.5) * Field.TILE;
+            burrower.y = burrower.lastY = (cell.row() + 0.5) * Field.TILE;
+            burrower.up = true;
             wander();
-            events.add(new Event.WormRose(worm.x, worm.y));
+            events.add(new Event.BurrowerRose(burrower.x, burrower.y));
             return;
         }
-        worm.sniff -= seconds;
-        if (worm.sniff <= 0) {
-            worm.sniff = 0.5;
-            worm.prey = 0;
-            double best = Field.WORM_SMELL * Field.TILE;
+        burrower.sniff -= seconds;
+        if (burrower.sniff <= 0) {
+            burrower.sniff = 0.5;
+            burrower.prey = 0;
+            double best = Field.BURROWER_SMELL * Field.TILE;
             for (Unit unit : units) {
                 if (!onSand(unit.x, unit.y)) continue;
-                double d = Math.hypot(unit.x - worm.x, unit.y - worm.y) / (unit.type().harvests() ? 2 : 1);
+                double d = Math.hypot(unit.x - burrower.x, unit.y - burrower.y) / (unit.type().harvests() ? 2 : 1);
                 if (d < best) {
                     best = d;
-                    worm.prey = unit.id();
+                    burrower.prey = unit.id();
                 }
             }
         }
-        Thing prey = things.get(worm.prey);
+        Thing prey = things.get(burrower.prey);
         if (prey instanceof Unit unit && unit.alive() && onSand(unit.x, unit.y)) {
-            worm.toX = unit.x;
-            worm.toY = unit.y;
-            if (Math.hypot(unit.x - worm.x, unit.y - worm.y) < Field.WORM_BITE) {
+            burrower.toX = unit.x;
+            burrower.toY = unit.y;
+            if (Math.hypot(unit.x - burrower.x, unit.y - burrower.y) < Field.BURROWER_BITE) {
                 unit.health = 0;
-                events.add(new Event.WormAte(unit));
-                worm.meals++;
-                worm.up = false;
-                worm.timer = Field.WORM_DIVE;
-                worm.prey = 0;
+                events.add(new Event.BurrowerAte(unit));
+                burrower.meals++;
+                burrower.up = false;
+                burrower.timer = Field.BURROWER_DIVE;
+                burrower.prey = 0;
                 return;
             }
-        } else if (Math.hypot(worm.toX - worm.x, worm.toY - worm.y) < Field.TILE) {
+        } else if (Math.hypot(burrower.toX - burrower.x, burrower.toY - burrower.y) < Field.TILE) {
             wander();
         }
-        double want = Math.atan2(worm.toY - worm.y, worm.toX - worm.x);
-        worm.angle = Angles.turnTowards(worm.angle, want, 2.5 * seconds);
-        double nx = worm.x + Math.cos(worm.angle) * Field.WORM_SPEED * seconds;
-        double ny = worm.y + Math.sin(worm.angle) * Field.WORM_SPEED * seconds;
+        double want = Math.atan2(burrower.toY - burrower.y, burrower.toX - burrower.x);
+        burrower.angle = Angles.turnTowards(burrower.angle, want, 2.5 * seconds);
+        double nx = burrower.x + Math.cos(burrower.angle) * Field.BURROWER_SPEED * seconds;
+        double ny = burrower.y + Math.sin(burrower.angle) * Field.BURROWER_SPEED * seconds;
         if (onSand(nx, ny)) {
-            worm.x = nx;
-            worm.y = ny;
+            burrower.x = nx;
+            burrower.y = ny;
         } else {
-            worm.prey = 0;
-            worm.sniff = 2;
+            burrower.prey = 0;
+            burrower.sniff = 2;
             wander();
         }
     }
-    // --8<-- [end:worm]
+    // --8<-- [end:burrower]
 
     private boolean onSand(double x, double y) {
         int col = (int) Math.floor(x / Field.TILE);
@@ -1182,19 +1182,19 @@ public final class Game {
         return contains(col, row) && level.ground(col, row).sandy();
     }
 
-    /** The worm picks a sand tile within ten tiles to wander to. */
+    /** The burrower picks a sand tile within ten tiles to wander to. */
     private void wander() {
         for (int i = 0; i < 40; i++) {
-            int col = (int) Math.floor(worm.x / Field.TILE) + random.nextInt(-10, 11);
-            int row = (int) Math.floor(worm.y / Field.TILE) + random.nextInt(-10, 11);
+            int col = (int) Math.floor(burrower.x / Field.TILE) + random.nextInt(-10, 11);
+            int row = (int) Math.floor(burrower.y / Field.TILE) + random.nextInt(-10, 11);
             if (contains(col, row) && level.ground(col, row).sandy()) {
-                worm.toX = (col + 0.5) * Field.TILE;
-                worm.toY = (row + 0.5) * Field.TILE;
+                burrower.toX = (col + 0.5) * Field.TILE;
+                burrower.toY = (row + 0.5) * Field.TILE;
                 return;
             }
         }
-        worm.toX = worm.x;
-        worm.toY = worm.y;
+        burrower.toX = burrower.x;
+        burrower.toY = burrower.y;
     }
 
     /** A sand tile at least twelve tiles from every vehicle and building, or {@code null}. */
@@ -1375,10 +1375,10 @@ public final class Game {
         return fields.searches();
     }
 
-    /** Puts spice back as a save file kept it. */
-    void restoreSpice(int[] amounts) {
-        System.arraycopy(amounts, 0, spice, 0, spice.length);
-        spiceVersion++;
+    /** Puts crystal back as a save file kept it. */
+    void restoreCrystal(int[] amounts) {
+        System.arraycopy(amounts, 0, crystal, 0, crystal.length);
+        crystalVersion++;
     }
 
     int width() {

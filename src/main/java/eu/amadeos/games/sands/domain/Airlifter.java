@@ -1,10 +1,10 @@
 package eu.amadeos.games.sands.domain;
 
 /**
- * The carryall: it flies a new refinery's harvester in from the edge of the map, sets it down at the
+ * The airlifter: it flies a new refinery's harvester in from the edge of the map, sets it down at the
  * refinery, and flies off again. It cannot be shot at.
  */
-public final class Carryall {
+public final class Airlifter {
     final Side side;
     double x;
     double y;
@@ -19,7 +19,7 @@ public final class Carryall {
     /** What it carries, {@code null} on the way back. */
     UnitType cargo;
 
-    Carryall(Side side, double x, double y, double toX, double toY, UnitType cargo) {
+    Airlifter(Side side, double x, double y, double toX, double toY, UnitType cargo) {
         this.side = side;
         this.x = x;
         this.y = y;

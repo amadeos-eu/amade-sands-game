@@ -10,7 +10,7 @@ import eu.amadeos.gameengine.sprite.Sprite;
 import eu.amadeos.gameengine.tile.Cell;
 import eu.amadeos.games.sands.domain.Building;
 import eu.amadeos.games.sands.domain.BuildingType;
-import eu.amadeos.games.sands.domain.Carryall;
+import eu.amadeos.games.sands.domain.Airlifter;
 import eu.amadeos.games.sands.domain.Commander;
 import eu.amadeos.games.sands.domain.Field;
 import eu.amadeos.games.sands.domain.Game;
@@ -21,7 +21,7 @@ import eu.amadeos.games.sands.domain.Side;
 import eu.amadeos.games.sands.domain.Task;
 import eu.amadeos.games.sands.domain.Unit;
 import eu.amadeos.games.sands.domain.Weapon;
-import eu.amadeos.games.sands.domain.Worm;
+import eu.amadeos.games.sands.domain.Burrower;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -37,7 +37,7 @@ import java.util.List;
 
 /**
  * Draws a battle as one side sees it, from the ground up: the desert, tracks and wrecks, the buildings, the
- * vehicles with their shadows, the worm, the shots, the explosions and smoke, the carryalls high above, the
+ * vehicles with their shadows, the burrower, the shots, the explosions and smoke, the airlifters high above, the
  * fog of war, and over the fog the marks of the player's orders. Nearly all of it is a copy of a sprite.
  */
 final class SandsPainter {
@@ -52,7 +52,7 @@ final class SandsPainter {
 
     static final double FLASH_SECONDS = 0.07;
     static final double ORDER_SECONDS = 0.8;
-    /** How far a carryall's shadow falls from it: it flies high. */
+    /** How far an airlifter's shadow falls from it: it flies high. */
     static final double FLIGHT_X = 14;
     static final double FLIGHT_Y = 18;
     static final Color OK = new Color(120, 240, 110, 90);
@@ -92,9 +92,9 @@ final class SandsPainter {
 
         terrain.render(g, camera, alpha);
         effects.renderGround(g, camera, alpha);
-        Worm worm = game.worm();
-        if (worm != null && !worm.up() && sees(game, viewer, worm.x(alpha), worm.y(alpha))) {
-            effects.renderWorm(g, worm, alpha);
+        Burrower burrower = game.burrower();
+        if (burrower != null && !burrower.up() && sees(game, viewer, burrower.x(alpha), burrower.y(alpha))) {
+            effects.renderBurrower(g, burrower, alpha);
         }
         if (viewer != null) ghosts(g, game, viewer, camera, alpha);
         for (Building building : game.buildings()) {
@@ -106,14 +106,14 @@ final class SandsPainter {
             shadow.draw(g, unit.x(alpha) + Art.LX, unit.y(alpha) + Art.LY, unit.angle(alpha));
         }
         for (Unit unit : game.units()) if (shows(game, viewer, unit)) unit(g, unit, alpha);
-        if (worm != null && worm.up() && sees(game, viewer, worm.x(alpha), worm.y(alpha))) {
-            effects.renderWorm(g, worm, alpha);
+        if (burrower != null && burrower.up() && sees(game, viewer, burrower.x(alpha), burrower.y(alpha))) {
+            effects.renderBurrower(g, burrower, alpha);
         }
         for (Shot shot : game.shots()) {
             if (sees(game, viewer, shot.x(alpha), shot.y(alpha))) shot(g, shot, alpha);
         }
         effects.render(g, alpha);
-        for (Carryall carryall : game.carryalls()) carryall(g, carryall, alpha);
+        for (Airlifter airlifter : game.airlifters()) airlifter(g, airlifter, alpha);
         if (viewer != null) fogPainter.render(g, game.house(viewer).fog(), fromCol, fromRow, toCol, toRow);
         if (marks.influence() != null) influence(g, marks.influence(), fromCol, fromRow, toCol, toRow);
         marks(g, marks, viewer, alpha);
@@ -207,17 +207,17 @@ final class SandsPainter {
         picture.draw(g, shot.x(alpha), shot.y(alpha), shot.angle());
     }
 
-    /** A carryall high in the air, its shadow far below it, and the harvester it carries. */
-    private void carryall(Graphics2D g, Carryall carryall, double alpha) {
-        double x = carryall.x(alpha);
-        double y = carryall.y(alpha);
-        double angle = carryall.angle();
-        pictures.carryallShadow.draw(g, x + FLIGHT_X, y + FLIGHT_Y, angle);
-        if (carryall.cargo() != null) {
-            pictures.shadow(carryall.cargo()).draw(g, x + FLIGHT_X, y + FLIGHT_Y, angle);
-            pictures.vehicle(carryall.cargo(), carryall.side(), 0).draw(g, x, y, angle);
+    /** An airlifter high in the air, its shadow far below it, and the harvester it carries. */
+    private void airlifter(Graphics2D g, Airlifter airlifter, double alpha) {
+        double x = airlifter.x(alpha);
+        double y = airlifter.y(alpha);
+        double angle = airlifter.angle();
+        pictures.airlifterShadow.draw(g, x + FLIGHT_X, y + FLIGHT_Y, angle);
+        if (airlifter.cargo() != null) {
+            pictures.shadow(airlifter.cargo()).draw(g, x + FLIGHT_X, y + FLIGHT_Y, angle);
+            pictures.vehicle(airlifter.cargo(), airlifter.side(), 0).draw(g, x, y, angle);
         }
-        pictures.carryall(carryall.side()).draw(g, x, y, angle);
+        pictures.airlifter(airlifter.side()).draw(g, x, y, angle);
     }
 
     // --8<-- [start:influence]

@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @param weapon   {@code null} for a vehicle without one, the harvester
  * @param needs    the ids of the buildings its side must have before a factory makes it
- * @param capacity the credits of spice it carries; 0 for all but the harvester
+ * @param capacity the credits of crystal it carries; 0 for all but the harvester
  */
 public record UnitType(String id, double health, double armour, double speed, double sight, double size, int cost,
                        double seconds, List<String> needs, Weapon weapon, boolean turret, int capacity) {

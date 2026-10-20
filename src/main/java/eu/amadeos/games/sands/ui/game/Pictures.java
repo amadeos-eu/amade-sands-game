@@ -35,10 +35,10 @@ final class Pictures {
     private final Map<String, Sprite> wrecks = new HashMap<>();
     private final Map<Side, Rotations> turrets = new EnumMap<>(Side.class);
     private final Map<Side, Rotations> heads = new EnumMap<>(Side.class);
-    private final Map<Side, Rotations> carryalls = new EnumMap<>(Side.class);
-    final Rotations carryallShadow = Rotations.of(TURNS, 26, (g, w, h) -> {
+    private final Map<Side, Rotations> airlifters = new EnumMap<>(Side.class);
+    final Rotations airlifterShadow = Rotations.of(TURNS, 26, (g, w, h) -> {
         g.translate(w / 2, h / 2);
-        Art.carryallShadow(g);
+        Art.airlifterShadow(g);
     });
     final Rotations shell = Rotations.of(TURNS, 16, (g, w, h) -> {
         g.translate(w / 2, h / 2);
@@ -52,15 +52,15 @@ final class Pictures {
         g.translate(w / 2, h / 2);
         Art.flash(g);
     });
-    final Sprite worm = Sprite.drawn(44, 44, (g, w, h) -> {
+    final Sprite burrower = Sprite.drawn(44, 44, (g, w, h) -> {
         g.translate(w / 2, h / 2);
-        Art.worm(g, 22);
+        Art.burrower(g, 22);
     });
-    final Sprite wormSign = Sprite.drawn(32, 28, (g, w, h) -> {
+    final Sprite burrowerSign = Sprite.drawn(32, 28, (g, w, h) -> {
         g.translate(w / 2, h / 2);
-        Art.wormSign(g);
+        Art.burrowerSign(g);
     });
-    final Sprite grain = Sprite.drawn(10, 10, (g, w, h) -> Art.spiceGrain(g, 5, 5, 5));
+    final Sprite grain = Sprite.drawn(10, 10, (g, w, h) -> Art.crystalGrain(g, 5, 5, 5));
     /** By size, then frame. */
     final Sprite[][] blasts = new Sprite[BLASTS.length][FRAMES];
     final Sprite[] puffs = new Sprite[PUFFS.length];
@@ -119,9 +119,9 @@ final class Pictures {
                 g.translate(w / 2, h / 2);
                 Art.turretHead(g, team);
             }));
-            carryalls.put(side, Rotations.of(TURNS, 26, (g, w, h) -> {
+            airlifters.put(side, Rotations.of(TURNS, 26, (g, w, h) -> {
                 g.translate(w / 2, h / 2);
-                Art.carryall(g, team);
+                Art.airlifter(g, team);
             }));
         }
         for (UnitType type : rules.units()) {
@@ -223,8 +223,8 @@ final class Pictures {
         return heads.get(side);
     }
 
-    Rotations carryall(Side side) {
-        return carryalls.get(side);
+    Rotations airlifter(Side side) {
+        return airlifters.get(side);
     }
 
     /** The size of explosion that fits a radius in units. */

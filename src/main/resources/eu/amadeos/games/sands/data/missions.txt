@@ -3,7 +3,7 @@
 #   map       the map in the folder maps, made in Tiled (see the README)
 #   credits   the player's credits at the start
 #   enemy     the computer's credits at the start
-#   worm      yes if a sand worm hunts on the open sand
+#   burrower      yes if a sand burrower hunts on the open sand
 #   attack    seconds before the computer's first attack
 #   every     seconds between its attacks after that
 #   army      vehicles in its first attack; each attack after brings grows more
@@ -14,7 +14,7 @@ mission 1
   map map1.tmx
   credits 1500
   enemy 1000
-  worm no
+  burrower no
   attack 420
   every 240
   army 3
@@ -25,7 +25,7 @@ mission 2
   map map2.tmx
   credits 1500
   enemy 1500
-  worm yes
+  burrower yes
   attack 330
   every 210
   army 4
@@ -36,7 +36,7 @@ mission 3
   map map3.tmx
   credits 1200
   enemy 2500
-  worm yes
+  burrower yes
   attack 260
   every 180
   army 6

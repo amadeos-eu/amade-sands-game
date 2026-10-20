@@ -5,9 +5,9 @@
 #   cost      credits, paid while the construction yard builds it; a building without a cost is not built,
 #             a map places it
 #   seconds   how long that takes at full power
-#   power     what a windtrap makes; every other building uses power (a negative number); 0 if not given
+#   power     what a turbine makes; every other building uses power (a negative number); 0 if not given
 #   sight     how far it sees, in tiles
-#   storage   credits of spice it stores
+#   storage   credits of crystal it stores
 #   needs     the buildings its side must have before the yard builds it (none if not given)
 #   yard      yes for the construction yard, which builds the buildings
 #   factory   yes for the factory, which makes the vehicles
@@ -23,7 +23,7 @@ building yard
   storage 1000
   yard yes
 
-building windtrap
+building turbine
   size 2 2
   health 400
   armour 0.2
@@ -42,7 +42,7 @@ building refinery
   power -30
   sight 4
   storage 1000
-  needs windtrap
+  needs turbine
   dock 3
 
 building silo
@@ -64,7 +64,7 @@ building outpost
   seconds 15
   power -30
   sight 9
-  needs windtrap
+  needs turbine
   radar yes
 
 building factory

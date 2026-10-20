@@ -20,7 +20,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.Random;
 
 /**
- * Every picture of Sands, drawn in code: the buildings, the vehicles, the carryall, the worm, the
+ * Every picture of Sands, drawn in code: the buildings, the vehicles, the airlifter, the burrower, the
  * explosions. Nothing here is drawn in a frame; {@link Pictures} draws each once into a sprite. Light falls
  * from the top left, so every shadow falls to the bottom right.
  *
@@ -351,7 +351,7 @@ final class Art {
         }
         switch (id) {
             case "yard" -> yard(g, team);
-            case "windtrap" -> windtrap(g, team);
+            case "turbine" -> turbine(g, team);
             case "refinery" -> refinery(g, team);
             case "silo" -> silo(g, team);
             case "outpost" -> outpost(g, team);
@@ -409,7 +409,7 @@ final class Art {
         flag(g, 6, 14, team);
     }
 
-    static void windtrap(Graphics2D g, Color[] team) {
+    static void turbine(Graphics2D g, Color[] team) {
         block(g, 2, 6, 28, 24, 6, 0xA89E8C, 0x7E7466);
         vents(g, 5, 10, 5, 8);
         band(g, 5, 20, 22, 2.5, team);
@@ -516,7 +516,7 @@ final class Art {
     static void refinery(Graphics2D g, Color[] team) {
         block(g, 2, 2, 44, 30, 8, 0xA89E8C, 0x7E7466);
         band(g, 4, 20, 40, 2.5, team);
-        // Three tanks with spice-stained tops.
+        // Three tanks with crystal-stained tops.
         for (int i = 0; i < 3; i++) {
             double cx = 10 + i * 13;
             double cy = 11;
@@ -525,7 +525,7 @@ final class Art {
             g.setPaint(radial(cx - 2, cy - 2, 6.5, new float[]{0, 0.7f, 1}, new Color(0xE8E0D0), new Color(0xA49C8C),
                     new Color(0x625A4E)));
             g.fill(new Ellipse2D.Double(cx - 5.5, cy - 5.5, 11, 11));
-            g.setColor(new Color(200, 100, 30, 130));
+            g.setColor(new Color(60, 170, 155, 130));
             g.fill(new Ellipse2D.Double(cx - 2, cy - 2, 4, 4));
             g.setColor(new Color(0x5A5248));
             g.setStroke(new BasicStroke(0.4f));
@@ -542,9 +542,9 @@ final class Art {
             for (double ly = 8; ly < 15; ly += 1.4) g.draw(new Line2D.Double(lx, ly, lx + 1.2, ly));
         }
         g.setStroke(new BasicStroke(1.2f));
-        g.setColor(new Color(0xE07A2A));
+        g.setColor(new Color(0x48B8A8));
         g.draw(new Line2D.Double(4, 25, 44, 25));
-        g.setColor(new Color(255, 160, 60, 70));
+        g.setColor(new Color(90, 230, 210, 70));
         g.setStroke(new BasicStroke(3f));
         g.draw(new Line2D.Double(4, 25, 44, 25));
         // The pad on the east side, where the harvesters unload.
@@ -886,17 +886,17 @@ final class Art {
         g.setColor(new Color(0, 0, 0, 110));
         g.setStroke(new BasicStroke(0.3f));
         g.draw(new RoundRectangle2D.Double(-9.5, -4.4, 16, 8.8, 2, 2));
-        // The hopper: walls, the heap of spice with its grains, the ribs.
+        // The hopper: walls, the heap of crystal with its grains, the ribs.
         g.setColor(new Color(0x3A3226));
         g.fill(new Rectangle2D.Double(-8, -3.2, 9.4, 6.4));
         if (load > 0) {
             double top = -3.2 + 6.4 * (1 - load);
-            g.setPaint(radial(-3.5, -0.5, 5, new float[]{0, 0.6f, 1}, new Color(0xF8A050), new Color(0xD06A28),
-                    new Color(0x7A3410)));
+            g.setPaint(radial(-3.5, -0.5, 5, new float[]{0, 0.6f, 1}, new Color(0x8CE8DC), new Color(0x3A9C90),
+                    new Color(0x16504C)));
             g.fill(new Rectangle2D.Double(-8, top, 9.4, 3.2 - top));
             Random grains = new Random(31);
             for (int i = 0; i < (int) (40 * load); i++) {
-                g.setColor(grains.nextBoolean() ? new Color(0x8A3A10) : new Color(0xFFC080));
+                g.setColor(grains.nextBoolean() ? new Color(0x14444A) : new Color(0xE0FFF8));
                 g.fill(new Ellipse2D.Double(-7.8 + grains.nextDouble() * 9, top + grains.nextDouble() * (3.1 - top),
                         0.45, 0.45));
             }
@@ -925,7 +925,7 @@ final class Art {
         g.setColor(new Color(255, 255, 255, 150));
         g.setStroke(new BasicStroke(0.25f));
         g.draw(new Line2D.Double(5.4, -2.2, 5.4, -0.6));
-        // The drum at the front that digs up the spice, with its teeth.
+        // The drum at the front that digs up the crystal, with its teeth.
         g.setPaint(new GradientPaint(7, -5.5f, new Color(0x8A8070), 7, 5.5f, new Color(0x2E2A24)));
         g.fill(new RoundRectangle2D.Double(7, -5.8, 2.8, 11.6, 1.6, 1.6));
         g.setColor(new Color(0x1A1612));
@@ -959,8 +959,8 @@ final class Art {
         return w;
     }
 
-    /** The carryall that flies new harvesters in. */
-    static void carryall(Graphics2D g, Color[] team) {
+    /** The airlifter that flies new harvesters in. */
+    static void airlifter(Graphics2D g, Color[] team) {
         smooth(g);
         g.setPaint(new GradientPaint(-6, -10, new Color(0xC8C2B6), 6, 10, new Color(0x6A6458)));
         g.fill(wing());
@@ -978,20 +978,20 @@ final class Art {
         g.fill(new Ellipse2D.Double(-10, -1, 2, 2));
     }
 
-    static void carryallShadow(Graphics2D g) {
+    static void airlifterShadow(Graphics2D g) {
         smooth(g);
         g.setColor(new Color(30, 15, 5, 60));
         g.fill(wing());
     }
 
-    // ---- the worm --------------------------------------------------------------------------------
+    // ---- the burrower --------------------------------------------------------------------------------
 
-    // --8<-- [start:worm]
+    // --8<-- [start:burrower]
     /**
-     * The worm out of the sand, from above: a ring of churned sand, its body's rings, and the round maw
+     * The burrower out of the sand, from above: a ring of churned sand, its body's rings, and the round maw
      * with three rings of teeth.
      */
-    static void worm(Graphics2D g, double r) {
+    static void burrower(Graphics2D g, double r) {
         smooth(g);
         g.setPaint(radial(0, 0, r, new float[]{0.55f, 0.8f, 1}, new Color(120, 70, 30, 150),
                 new Color(200, 140, 80, 90), new Color(200, 140, 80, 0)));
@@ -1008,7 +1008,7 @@ final class Art {
             g.setColor(new Color(60, 35, 15, 120));
             g.draw(new Ellipse2D.Double(-ring, -ring, 2 * ring, 2 * ring));
         }
-        // --8<-- [end:worm]
+        // --8<-- [end:burrower]
         double maw = body * 0.58;
         g.setPaint(radial(0, 0, maw, new float[]{0, 0.6f, 1}, new Color(0x0A0402), new Color(0x3A1408),
                 new Color(0x8A3A20)));
@@ -1030,8 +1030,8 @@ final class Art {
         }
     }
 
-    /** Where the worm moves under the sand: a bulge of sand with ripples, its head to the east. */
-    static void wormSign(Graphics2D g) {
+    /** Where the burrower moves under the sand: a bulge of sand with ripples, its head to the east. */
+    static void burrowerSign(Graphics2D g) {
         smooth(g);
         for (int i = 0; i < 3; i++) {
             double r = 6 + i * 4;
@@ -1187,13 +1187,21 @@ final class Art {
         }
     }
 
-    /** A grain of spice for the credits: an orange ball with darker spots. */
-    static void spiceGrain(Graphics2D g, double x, double y, double r) {
+    /** A crystal for the credits: a teal gem cut into four facets, light from the upper left. */
+    static void crystalGrain(Graphics2D g, double x, double y, double r) {
         smooth(g);
-        g.setPaint(radial(x - r * 0.2, y - r * 0.3, r * 1.2, new float[]{0, 1}, new Color(0xF8B060), new Color(0xA04A14)));
-        g.fill(new Ellipse2D.Double(x - r, y - r, 2 * r, 2 * r));
-        g.setColor(new Color(0x6A2A08));
-        g.fill(new Ellipse2D.Double(x - r * 0.2, y - r * 0.1, r * 0.4, r * 0.4));
-        g.fill(new Ellipse2D.Double(x + r * 0.4, y + r * 0.3, r * 0.3, r * 0.3));
+        double[][] corners = {{x, y - r}, {x + r * 0.8, y}, {x, y + r}, {x - r * 0.8, y}};
+        Color[] facets = {new Color(0x9CF0E4), new Color(0x3A9C90), new Color(0x1E5E58), new Color(0x5CC4B6)};
+        for (int i = 0; i < 4; i++) {
+            Path2D.Double facet = new Path2D.Double();
+            facet.moveTo(x, y);
+            facet.lineTo(corners[i][0], corners[i][1]);
+            facet.lineTo(corners[(i + 1) % 4][0], corners[(i + 1) % 4][1]);
+            facet.closePath();
+            g.setColor(facets[(i + 3) % 4]);
+            g.fill(facet);
+        }
+        g.setColor(new Color(0xF0FFFC));
+        g.fill(new Ellipse2D.Double(x - r * 0.45, y - r * 0.45, r * 0.3, r * 0.3));
     }
 }

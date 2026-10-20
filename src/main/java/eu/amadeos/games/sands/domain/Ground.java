@@ -6,21 +6,21 @@ import eu.amadeos.gameengine.tiled.TiledMap;
 /**
  * What a tile of a map is to the rules, by the class its tile has in Tiled's tileset: open {@code sand},
  * {@code dune}s that slow the vehicles down, {@code rock} to build on, {@code cliff}s nothing crosses, and
- * {@code spice} and {@code thick} spice on the sand, to harvest. A tile without a class is sand.
+ * {@code crystal} and {@code thick} crystal on the sand, to harvest. A tile without a class is sand.
  */
 // --8<-- [start:ground]
 public enum Ground {
-    SAND(0), DUNE(0), ROCK(0), CLIFF(0), SPICE(100), THICK(250);
+    SAND(0), DUNE(0), ROCK(0), CLIFF(0), CRYSTAL(100), THICK(250);
 
-    /** The credits of spice a tile of this ground holds at the start. */
-    private final int spice;
+    /** The credits of crystal a tile of this ground holds at the start. */
+    private final int crystal;
 
-    Ground(int spice) {
-        this.spice = spice;
+    Ground(int crystal) {
+        this.crystal = crystal;
     }
 
-    public int spice() {
-        return spice;
+    public int crystal() {
+        return crystal;
     }
 
     /** Vehicles drive anywhere but over cliffs. */
@@ -33,7 +33,7 @@ public enum Ground {
         return this == ROCK;
     }
 
-    /** The worm lives in the sand and cannot go onto rock. */
+    /** The burrower lives in the sand and cannot go onto rock. */
     public boolean sandy() {
         return this != ROCK && this != CLIFF;
     }
@@ -45,10 +45,10 @@ public enum Ground {
             case "dune" -> DUNE;
             case "rock" -> ROCK;
             case "cliff" -> CLIFF;
-            case "spice" -> SPICE;
+            case "crystal" -> CRYSTAL;
             case "thick" -> THICK;
             default -> throw new DataException(map.source() + ": the tile class \"" + map.type(gid)
-                    + "\" means nothing to the game; use sand, dune, rock, cliff, spice or thick");
+                    + "\" means nothing to the game; use sand, dune, rock, cliff, crystal or thick");
         };
     }
 }

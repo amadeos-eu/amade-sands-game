@@ -12,7 +12,7 @@
 #             or the rocket flies, in tiles per second) and, for a rocket, splash (the radius of its burst
 #             in tiles)
 #   turret    yes if the gun turns on its own; else the whole vehicle turns to fire
-#   capacity  credits of spice a harvester carries
+#   capacity  credits of crystal a harvester carries
 
 unit trike
   health 100

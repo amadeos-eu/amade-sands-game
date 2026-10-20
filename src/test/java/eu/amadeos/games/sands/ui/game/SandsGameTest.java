@@ -121,7 +121,7 @@ class SandsGameTest {
                 for (int dx = -r; dx <= r; dx++) {
                     int c = col + dx;
                     int w = row + dy;
-                    if (g.contains(c, w) && g.level().ground(c, w) == Ground.SAND && g.open(c, w) && g.spice(c, w) == 0
+                    if (g.contains(c, w) && g.level().ground(c, w) == Ground.SAND && g.open(c, w) && g.crystal(c, w) == 0
                             && g.building(c, w) == null) {
                         return new Cell(c, w);
                     }
@@ -141,7 +141,7 @@ class SandsGameTest {
         tap(KeyEvent.VK_ENTER);
         SandsGame.PlayScene play = assertInstanceOf(SandsGame.PlayScene.class, game.top());
         assertEquals(1, play.game().level().number());
-        assertEquals("Mission 1 · First Spice", play.message());
+        assertEquals("Mission 1 · First Crystals", play.message());
     }
 
     @Test
@@ -187,17 +187,17 @@ class SandsGameTest {
     }
 
     @Test
-    void thePanelBuildsAWindtrapAndTheMouseGivesItItsPlace() {
+    void thePanelBuildsATurbineAndTheMouseGivesItItsPlace() {
         SandsGame.PlayScene play = mission();
-        BuildingType windtrap = game.rules().building("windtrap");
-        assertSame(windtrap, Hud.buildings(play.game(), Side.BLUE).getFirst());
+        BuildingType turbine = game.rules().building("turbine");
+        assertSame(turbine, Hud.buildings(play.game(), Side.BLUE).getFirst());
         moveTo(Hud.cell(0).getCenterX(), Hud.cell(0).getCenterY());
         click(MouseEvent.BUTTON1);
-        assertSame(windtrap, play.game().house(Side.BLUE).yard().current());
-        seconds(windtrap.seconds() + 1);
-        assertSame(windtrap, play.game().house(Side.BLUE).yard().ready());
+        assertSame(turbine, play.game().house(Side.BLUE).yard().current());
+        seconds(turbine.seconds() + 1);
+        assertSame(turbine, play.game().house(Side.BLUE).yard().ready());
         click(MouseEvent.BUTTON1);
-        assertSame(windtrap, play.placing(), "the windtrap goes looking for its place");
+        assertSame(turbine, play.placing(), "the turbine goes looking for its place");
 
         Cell sand = sand(play, yard(play).x(), yard(play).y());
         over(play, (sand.col() + 0.5) * Field.TILE, (sand.row() + 0.5) * Field.TILE);
@@ -206,16 +206,16 @@ class SandsGameTest {
         assertEquals("Buildings stand on rock only", play.message());
 
         Building yard = yard(play);
-        int traps = play.game().count(Side.BLUE, windtrap);
+        int traps = play.game().count(Side.BLUE, turbine);
         for (int row = yard.row() - 3; row < yard.row() + 8 && play.placing() != null; row++) {
             for (int col = yard.col() - 3; col < yard.col() + 8 && play.placing() != null; col++) {
-                if (play.game().placement(Side.BLUE, windtrap, col, row) != Game.Placement.OK) continue;
+                if (play.game().placement(Side.BLUE, turbine, col, row) != Game.Placement.OK) continue;
                 over(play, (col + 1) * Field.TILE, (row + 1) * Field.TILE);
                 click(MouseEvent.BUTTON1);
             }
         }
         assertNull(play.placing());
-        assertEquals(traps + 1, play.game().count(Side.BLUE, windtrap));
+        assertEquals(traps + 1, play.game().count(Side.BLUE, turbine));
     }
 
     @Test
@@ -227,7 +227,7 @@ class SandsGameTest {
         click(MouseEvent.BUTTON1);
         assertEquals(before, play.camera().x(), "no radar yet");
         Cheat.build(play.game(), Side.BLUE, "outpost");
-        if (play.game().house(Side.BLUE).lowPower()) Cheat.build(play.game(), Side.BLUE, "windtrap");
+        if (play.game().house(Side.BLUE).lowPower()) Cheat.build(play.game(), Side.BLUE, "turbine");
         steps(2);
         moveTo(play.minimap().x() + play.minimap().width() - 2, play.minimap().y() + play.minimap().height() - 2);
         click(MouseEvent.BUTTON1);

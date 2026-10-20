@@ -6,6 +6,6 @@ package eu.amadeos.games.sands.domain;
  *
  * @param army  the vehicles of its first attack; each later attack brings {@code grows} more
  */
-public record Mission(int number, String map, int credits, int enemyCredits, boolean worm, double attack, double every,
+public record Mission(int number, String map, int credits, int enemyCredits, boolean burrower, double attack, double every,
                       int army, int grows, int turrets) {
 }

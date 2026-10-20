@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 
 /**
  * The screenshots of chapter 31, drawn without a screen: the title, the choice of a mission, a base with a
- * group of tanks sent off, a building looking for its place, a battle, the worm, and the computer's view
+ * group of tanks sent off, a building looking for its place, a battle, the burrower, and the computer's view
  * of the player's strength. {@code ./gradlew screenshots -Pshots=<folder>}.
  */
 public final class Screenshots {
@@ -99,11 +99,11 @@ public final class Screenshots {
         return play;
     }
 
-    /** Mission 1 with a windtrap ready: the player looks for its place next to the yard. */
+    /** Mission 1 with a turbine ready: the player looks for its place next to the yard. */
     private SandsGame.PlayScene placing() {
         Game battle = new Game(game.level(1), game.rules(), 3, Set.of(Side.RED));
         SandsGame.PlayScene play = game.play(battle);
-        battle.build(Side.BLUE, game.rules().building("windtrap"));
+        battle.build(Side.BLUE, game.rules().building("turbine"));
         steps(20 * SandsGame.UPDATES_PER_SECOND);
         Building yard = battle.buildings().stream().filter(b -> b.side() == Side.BLUE && b.type().yard())
                 .findFirst().orElseThrow();
@@ -114,13 +114,13 @@ public final class Screenshots {
         mouse.moved(mouseX, mouseY);
         steps(2);
         click();
-        BuildingType windtrap = game.rules().building("windtrap");
+        BuildingType turbine = game.rules().building("turbine");
         for (int d = 1; d < 12; d++) {
             for (int dy = -d; dy <= d; dy++) {
                 for (int dx = -d; dx <= d; dx++) {
                     int col = yard.col() + yard.type().width() + dx;
                     int row = yard.row() + dy;
-                    if (battle.placement(Side.BLUE, windtrap, col, row) == Game.Placement.OK) {
+                    if (battle.placement(Side.BLUE, turbine, col, row) == Game.Placement.OK) {
                         point(play, (col + 1) * Field.TILE, (row + 1) * Field.TILE);
                         steps(5);
                         return play;
@@ -128,7 +128,7 @@ public final class Screenshots {
                 }
             }
         }
-        throw new IllegalStateException("no place for a windtrap");
+        throw new IllegalStateException("no place for a turbine");
     }
 
     /**

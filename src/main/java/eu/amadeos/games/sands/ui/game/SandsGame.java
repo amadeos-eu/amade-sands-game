@@ -272,7 +272,7 @@ public final class SandsGame implements Arena {
         @Override
         public void renderOverlay(Graphics2D g, double alpha) {
             hud.veil(g);
-            hud.text(g, msg.get("window.title"), 120, 72, true, Hud.SPICE);
+            hud.text(g, msg.get("window.title"), 120, 72, true, Hud.AMBER);
             hud.text(g, msg.get("title.subtitle"), 150, 14, false, Hud.CHALK);
             hud.text(g, msg.get("title.start"), 210, 18, false, Hud.CHALK);
             hud.text(g, msg.get("title.mouse"), 262, 12, false, Hud.CHALK);
@@ -354,7 +354,7 @@ public final class SandsGame implements Arena {
         @Override
         public void renderOverlay(Graphics2D g, double alpha) {
             hud.veil(g);
-            hud.text(g, msg.get("select.title"), 70, 30, true, Hud.SPICE);
+            hud.text(g, msg.get("select.title"), 70, 30, true, Hud.AMBER);
             for (int i = 0; i < levels.size(); i++) {
                 int number = i + 1;
                 hud.card(g, Hud.cardX(i, levels.size()), Hud.CARD_TOP, number, number <= progress.open(),
@@ -398,7 +398,7 @@ public final class SandsGame implements Arena {
         private Color messageColour = Hud.CHALK;
         private double messageShown = Double.MAX_VALUE;
         private int fogVersion = -1;
-        private int spiceVersion = -1;
+        private int crystalVersion = -1;
         private double ended;
         private boolean best;
 
@@ -414,7 +414,7 @@ public final class SandsGame implements Arena {
             }
             effects.clear();
             effects.music();
-            say(msg.format("play.mission", level.number(), hud.name(level.number())), Hud.SPICE);
+            say(msg.format("play.mission", level.number(), hud.name(level.number())), Hud.AMBER);
         }
 
         @Override
@@ -449,9 +449,9 @@ public final class SandsGame implements Arena {
             if (placing != null && game.house(PLAYER).yard().ready() != placing) placing = null;
             terrain.update(game);
             FogOfWar fog = game.house(PLAYER).fog();
-            if (fog.version() != fogVersion || game.spiceVersion() != spiceVersion) {
+            if (fog.version() != fogVersion || game.crystalVersion() != crystalVersion) {
                 fogVersion = fog.version();
-                spiceVersion = game.spiceVersion();
+                crystalVersion = game.crystalVersion();
                 for (int row = 0; row < game.level().height(); row++) {
                     for (int col = 0; col < game.level().width(); col++) {
                         minimap.paint(col, row, Hud.minimapPixel(game, fog, col, row));
@@ -473,15 +473,15 @@ public final class SandsGame implements Arena {
                         say(msg.format("message.deployed", msg.get("thing." + unit.type().id())), Hud.GREEN);
                 case Event.UnderAttack(Side side, double x, double y) when side == PLAYER ->
                         say(msg.get("message.attack"), Hud.RED);
-                case Event.StorageFull(Side side) when side == PLAYER -> say(msg.get("message.silos"), Hud.SPICE);
+                case Event.StorageFull(Side side) when side == PLAYER -> say(msg.get("message.silos"), Hud.AMBER);
                 case Event.Placed(Building placed) when placed.side() == PLAYER && game.house(PLAYER).lowPower() ->
                         say(msg.get("message.power"), Hud.RED);
                 case Event.Collapsed(Building fallen) when fallen.side() == PLAYER ->
                         say(msg.format("message.lost", msg.get("thing." + fallen.type().id())), Hud.RED);
                 case Event.Collapsed(Building fallen) when fallen.side() != PLAYER ->
                         say(msg.format("message.destroyed", msg.get("thing." + fallen.type().id())), Hud.GREEN);
-                case Event.WormRose(double x, double y) when visible(x, y) -> say(msg.get("message.worm"), Hud.SPICE);
-                case Event.WormAte(Unit unit) when unit.side() == PLAYER ->
+                case Event.BurrowerRose(double x, double y) when visible(x, y) -> say(msg.get("message.burrower"), Hud.AMBER);
+                case Event.BurrowerAte(Unit unit) when unit.side() == PLAYER ->
                         say(msg.format("message.eaten", msg.get("thing." + unit.type().id())), Hud.RED);
                 case Event.Over(Side winner) -> {
                     if (winner == PLAYER) {
@@ -632,7 +632,7 @@ public final class SandsGame implements Arena {
 
         // --8<-- [start:command]
         /**
-         * The right button on the map: the chosen attack an enemy under it, harvesters go to spice or home
+         * The right button on the map: the chosen attack an enemy under it, harvesters go to crystal or home
          * to a refinery, the rest drive there; with Ctrl they fight their way there. Without anything chosen,
          * or while a building waits for its place, it takes back the choice.
          */
@@ -657,7 +657,7 @@ public final class SandsGame implements Arena {
                 game.attack(chosen, enemy);
             } else if (harvesters && there != null && there.side() == PLAYER && there.type().dock() >= 0) {
                 game.bringHome(chosen);
-            } else if (harvesters && game.spice(col, row) > 0) {
+            } else if (harvesters && game.crystal(col, row) > 0) {
                 game.harvest(chosen, cell);
             } else if (hunt) {
                 game.hunt(chosen, cell);
@@ -927,7 +927,7 @@ public final class SandsGame implements Arena {
             String[] keys = {"pause.continue", "pause.save", "pause.load", "pause.leave"};
             for (int i = 0; i < keys.length; i++) {
                 hud.text(g, msg.get(keys[i]), PAUSE_TOP + i * PAUSE_ROW, 15, i == highlighted,
-                        i == highlighted ? Hud.SPICE : Hud.CHALK);
+                        i == highlighted ? Hud.AMBER : Hud.CHALK);
             }
             if (note != null) hud.text(g, note, PAUSE_TOP + 4 * PAUSE_ROW + 10, 12, false, Hud.GREEN);
         }

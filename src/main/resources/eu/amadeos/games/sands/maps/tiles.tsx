@@ -5,6 +5,6 @@
  <tile id="1" type="dune"/>
  <tile id="2" type="rock"/>
  <tile id="3" type="cliff"/>
- <tile id="4" type="spice"/>
+ <tile id="4" type="crystal"/>
  <tile id="5" type="thick"/>
 </tileset>

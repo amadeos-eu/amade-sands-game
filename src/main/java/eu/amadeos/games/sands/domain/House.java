@@ -82,7 +82,7 @@ public final class House {
         return Collections.unmodifiableCollection(known.values());
     }
 
-    /** Credits of spice brought home, vehicles made, lost and enemy things destroyed. */
+    /** Credits of crystal brought home, vehicles made, lost and enemy things destroyed. */
     public int harvested() {
         return harvested;
     }

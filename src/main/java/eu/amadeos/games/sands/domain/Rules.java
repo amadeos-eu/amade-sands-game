@@ -135,7 +135,7 @@ public final class Rules {
             }
             if (number != missions.size() + 1) throw mission.error("the missions are numbered 1, 2, 3 and so on");
             missions.put(number, new Mission(number, mission.text("map"), mission.integer("credits"),
-                    mission.integer("enemy"), yes(mission, "worm"), positive(mission, "attack"),
+                    mission.integer("enemy"), yes(mission, "burrower"), positive(mission, "attack"),
                     positive(mission, "every"), mission.integer("army"), mission.integer("grows"),
                     mission.integer("turrets")));
             mission.finish();

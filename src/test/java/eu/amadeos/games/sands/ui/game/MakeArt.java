@@ -11,8 +11,8 @@ import java.io.File;
 
 /**
  * Draws the files made from the game's own art, which are part of the repository: the tileset picture
- * that Tiled shows ({@code maps/tiles.png}: sand, dune, rock, cliff, spice, thick spice) and the program
- * icon, a harvester on the spice, at 48 and 256 pixels. {@code ./gradlew art}, then for Windows:
+ * that Tiled shows ({@code maps/tiles.png}: sand, dune, rock, cliff, crystal, thick crystal) and the program
+ * icon, a harvester on the crystal, at 48 and 256 pixels. {@code ./gradlew art}, then for Windows:
  *
  * <pre>
  * python3 -c "from PIL import Image; Image.open('build/icon-256.png').save('packaging/windows/amade-sands-game.ico',
@@ -20,7 +20,7 @@ import java.io.File;
  * </pre>
  */
 public final class MakeArt {
-    private static final int[] GROUND = {0xD8A462, 0xE0B06C, 0x84644A, 0x5E4432, 0xC86A2C, 0xA8501E};
+    private static final int[] GROUND = {0xD8A462, 0xE0B06C, 0x84644A, 0x5E4432, 0x4A9A90, 0x2E7C78};
 
     private MakeArt() {
     }
@@ -48,7 +48,7 @@ public final class MakeArt {
         return image;
     }
 
-    /** A harvester seen from above on a round patch of sand and spice. */
+    /** A harvester seen from above on a round patch of sand and crystal. */
     static BufferedImage icon(int size) {
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();
@@ -57,7 +57,7 @@ public final class MakeArt {
         g.scale(size / 24.0, size / 24.0);
         Ellipse2D.Double patch = new Ellipse2D.Double(0.5, 0.5, 23, 23);
         g.setPaint(new RadialGradientPaint(9, 8, 16, new float[]{0, 0.55f, 1},
-                new Color[]{new Color(0xE8B878), new Color(0xC87A3A), new Color(0x7A3A14)}));
+                new Color[]{new Color(0xE8C890), new Color(0x58A898), new Color(0x1E5E58)}));
         g.fill(patch);
         g.translate(12, 12.5);
         g.rotate(-0.75);

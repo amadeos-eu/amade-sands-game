@@ -43,7 +43,7 @@ import java.util.Random;
  */
 final class Hud {
     static final Color CHALK = new Color(0xF2E8D4);
-    static final Color SPICE = new Color(0xF8C878);
+    static final Color AMBER = new Color(0xF8C878);
     static final Color LABEL = new Color(0xC8A870);
     static final Color GREEN = new Color(0x7AF070);
     static final Color RED = new Color(0xFF6B5B);
@@ -183,7 +183,7 @@ final class Hud {
         bevel(g, LEFT + 8, 6, Field.PANEL - 16, 18, true);
         pictures.grain.draw(g, LEFT + 13, 10);
         g.setFont(font(12, true));
-        g.setColor(house.credits() >= house.storage() && house.storage() > 0 ? RED : SPICE);
+        g.setColor(house.credits() >= house.storage() && house.storage() > 0 ? RED : AMBER);
         String credits = String.format("%,d", house.credits()).replace(',', ' ');
         g.drawString(credits, (float) (LEFT + Field.PANEL - 14 - g.getFontMetrics().stringWidth(credits)), 19.5f);
     }
@@ -232,7 +232,7 @@ final class Hud {
         return owner == viewer ? Art.team(owner)[0] : new Color(0xF04A3A);
     }
 
-    /** The colour of a tile on the minimap: its ground and spice, dim where nobody sees now, black where nobody has been. */
+    /** The colour of a tile on the minimap: its ground and crystal, dim where nobody sees now, black where nobody has been. */
     static int minimapPixel(Game game, FogOfWar fog, int col, int row) {
         FogOfWar.State state = fog == null ? FogOfWar.State.VISIBLE : fog.state(col, row);
         if (state == FogOfWar.State.UNSEEN) return 0x050302;
@@ -243,8 +243,8 @@ final class Hud {
             case DUNE -> 0xE0AE6A;
             default -> 0xD09A58;
         };
-        int spice = game.spice(col, row);
-        if (spice > 0) colour = Art.mix(0xC86A2C, 0xA04A18, spice / (double) Ground.THICK.spice());
+        int crystal = game.crystal(col, row);
+        if (crystal > 0) colour = Art.mix(0x4A9A90, 0x2E7C78, crystal / (double) Ground.THICK.crystal());
         return state == FogOfWar.State.SEEN ? Art.shade(colour, 0.55) : colour;
     }
 
@@ -310,7 +310,7 @@ final class Hud {
                     sg.setFont(font(7, true));
                     sg.setColor(CHALK);
                     sg.drawString(msg.get("thing." + id), (float) cell.x + 3, (float) (cell.y + cell.height - 3));
-                    sg.setColor(SPICE);
+                    sg.setColor(AMBER);
                     String price = Integer.toString(cost);
                     sg.drawString(price, (float) (cell.x + cell.width - 3 - sg.getFontMetrics().stringWidth(price)),
                             (float) (cell.y + cell.height - 3));
@@ -458,12 +458,12 @@ final class Hud {
         g.setPaint(new GradientPaint((float) x, (float) y, chosen ? new Color(0x5A4630) : new Color(0x3A3128), (float) x,
                 (float) (y + CARD_HEIGHT), new Color(0x1E1812)));
         g.fill(card);
-        g.setColor(chosen ? SPICE : BRASS);
+        g.setColor(chosen ? AMBER : BRASS);
         g.setStroke(new BasicStroke(chosen ? 1.6f : 1f));
         g.draw(card);
         double cx = x + CARD_WIDTH / 2;
         g.setFont(font(34, true));
-        g.setColor(open ? SPICE : GREY);
+        g.setColor(open ? AMBER : GREY);
         centred(g, Integer.toString(number), cx, y + 46);
         g.setFont(font(15, true));
         g.setColor(open ? CHALK : GREY);
@@ -501,7 +501,7 @@ final class Hud {
     void result(Graphics2D g, Game game, Side side, boolean best, boolean last) {
         veil(g);
         boolean won = game.winner() == side;
-        text(g, msg.get(won ? "won.title" : "lost.title"), 110, 32, true, won ? SPICE : RED);
+        text(g, msg.get(won ? "won.title" : "lost.title"), 110, 32, true, won ? AMBER : RED);
         text(g, msg.format("result.time", clock((int) game.time())), 145, 14, false, CHALK);
         if (won && best) text(g, msg.get("won.best"), 165, 12, true, GREEN);
         House mine = game.house(side);

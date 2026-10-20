@@ -15,7 +15,7 @@ import eu.amadeos.games.sands.domain.Side;
 import eu.amadeos.games.sands.domain.Unit;
 import eu.amadeos.games.sands.domain.UnitType;
 import eu.amadeos.games.sands.domain.Weapon;
-import eu.amadeos.games.sands.domain.Worm;
+import eu.amadeos.games.sands.domain.Burrower;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -33,19 +33,19 @@ import java.util.Map;
 
 /**
  * What the events of a step look and sound like: muzzle flashes and explosions, smoke that drifts with the
- * wind, wrecks and the rubble of buildings, the tracks the vehicles leave in the sand, spice dust behind a
+ * wind, wrecks and the rubble of buildings, the tracks the vehicles leave in the sand, crystal dust behind a
  * harvester at work, and the sounds. The rules know nothing of this. Everything lives in world units and is
  * drawn by the painter.
  *
  * <p>Sounds are only heard of what the player can see, or of what happens to the player's own side.
  */
 final class Effects {
-    /** Sparks, dust, spice, fire, metal. */
-    static final Color[] PALETTE = {new Color(0xFFE6A0), new Color(0xC89A64), new Color(0xE07A30),
+    /** Sparks, dust, crystal, fire, metal. */
+    static final Color[] PALETTE = {new Color(0xFFE6A0), new Color(0xC89A64), new Color(0x58C0B0),
             new Color(0xFF8A2A), new Color(0x4A4038)};
     static final int SPARK = 0;
     static final int DUST = 1;
-    static final int SPICE = 2;
+    static final int CRYSTAL = 2;
     static final int FIRE = 3;
     static final int METAL = 4;
     static final double BLAST_SECONDS = 0.45;
@@ -160,7 +160,7 @@ final class Effects {
         if (puff) smoke = 0;
         for (Unit unit : game.units()) {
             track(game, unit);
-            if (unit.harvesting() && random.nextDouble() < seconds * 30) spiceDust(unit);
+            if (unit.harvesting() && random.nextDouble() < seconds * 30) crystalDust(unit);
             if (puff && unit.health() < unit.maxHealth() * 0.35) puff(unit.x(), unit.y() - 2, 1);
         }
         lastMark.keySet().removeIf(id -> game.thing(id) == null);
@@ -201,14 +201,14 @@ final class Effects {
         if (tracks.size() > MOST_TRACKS) tracks.removeFirst();
     }
 
-    private void spiceDust(Unit unit) {
+    private void crystalDust(Unit unit) {
         double a = unit.angle() + Math.PI + (random.nextDouble() - 0.5) * 1.2;
         double v = 8 + random.nextDouble() * 14;
         double front = unit.radius() * 1.6;
         double x = unit.x() + Math.cos(unit.angle()) * front;
         double y = unit.y() + Math.sin(unit.angle()) * front;
         particles.spawn(x, y, Math.cos(a) * v + WIND_X, Math.sin(a) * v + WIND_Y, 0.6 + random.nextDouble() * 0.6,
-                1.2 + random.nextDouble() * 2, random.nextDouble() < 0.7 ? SPICE : DUST);
+                1.2 + random.nextDouble() * 2, random.nextDouble() < 0.7 ? CRYSTAL : DUST);
     }
 
     // --8<-- [start:react]
@@ -269,12 +269,12 @@ final class Effects {
                 }
                 case Event.Sold(Building building, int refund) -> {
                     dust(building.x(), building.y(), 20, DUST);
-                    say(building.x(), building.y(), "+" + refund, Hud.SPICE);
+                    say(building.x(), building.y(), "+" + refund, Hud.AMBER);
                     if (building.side() == viewer && audible) play(sounds.credits);
                 }
                 case Event.Unloaded(Unit harvester, int credits) -> {
                     if (harvester.side() == viewer) {
-                        say(harvester.x(), harvester.y() - 10, "+" + credits, Hud.SPICE);
+                        say(harvester.x(), harvester.y() - 10, "+" + credits, Hud.AMBER);
                         if (audible) play(sounds.credits);
                     }
                 }
@@ -287,11 +287,11 @@ final class Effects {
                 case Event.UnderAttack(Side side, double x, double y) -> {
                     if (side == viewer && audible) play(sounds.alarm);
                 }
-                case Event.WormRose(double x, double y) -> {
+                case Event.BurrowerRose(double x, double y) -> {
                     dust(x, y, 24, DUST);
-                    if (heard(game, viewer, audible, x, y, null)) play(sounds.worm);
+                    if (heard(game, viewer, audible, x, y, null)) play(sounds.burrower);
                 }
-                case Event.WormAte(Unit unit) -> {
+                case Event.BurrowerAte(Unit unit) -> {
                     dust(unit.x(), unit.y(), 30, DUST);
                     sparkle(unit.x(), unit.y(), 8, METAL, 30);
                     if (audible && (unit.side() == viewer || visible(game, viewer, unit.x(), unit.y()))) play(sounds.boom);
@@ -390,14 +390,14 @@ final class Effects {
         g.setComposite(before);
     }
 
-    /** Where the worm moves under the sand: its sign, and the ripples it leaves behind. */
-    void renderWorm(Graphics2D g, Worm worm, double alpha) {
-        double x = worm.x(alpha);
-        double y = worm.y(alpha);
-        if (worm.up()) {
-            pictures.worm.draw(g, x - pictures.worm.width() / 2, y - pictures.worm.height() / 2);
+    /** Where the burrower moves under the sand: its sign, and the ripples it leaves behind. */
+    void renderBurrower(Graphics2D g, Burrower burrower, double alpha) {
+        double x = burrower.x(alpha);
+        double y = burrower.y(alpha);
+        if (burrower.up()) {
+            pictures.burrower.draw(g, x - pictures.burrower.width() / 2, y - pictures.burrower.height() / 2);
         } else {
-            pictures.wormSign.draw(g, x - pictures.wormSign.width() / 2, y - pictures.wormSign.height() / 2);
+            pictures.burrowerSign.draw(g, x - pictures.burrowerSign.width() / 2, y - pictures.burrowerSign.height() / 2);
         }
     }
 

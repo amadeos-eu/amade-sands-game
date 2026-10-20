@@ -14,7 +14,7 @@ class LevelTest {
     private final Rules rules = Rules.load();
 
     @Test
-    void everyMapGivesBothSidesAYardOnRockAndSpice() {
+    void everyMapGivesBothSidesAYardOnRockAndCrystal() {
         for (int number = 1; number <= rules.missions(); number++) {
             Level level = Level.load(number, rules);
             for (Side side : Side.values()) {
@@ -22,11 +22,11 @@ class LevelTest {
                         "map " + number + ": one yard for " + side);
             }
             Game game = new Game(level, rules, 1, Set.of());
-            int spice = 0;
+            int crystal = 0;
             for (int row = 0; row < level.height(); row++) {
-                for (int col = 0; col < level.width(); col++) spice += game.spice(col, row);
+                for (int col = 0; col < level.width(); col++) crystal += game.crystal(col, row);
             }
-            assertTrue(spice > 10_000, "map " + number + ": spice enough for a battle, " + spice);
+            assertTrue(crystal > 10_000, "map " + number + ": crystal enough for a battle, " + crystal);
         }
     }
 

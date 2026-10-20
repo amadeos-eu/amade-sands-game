@@ -13,7 +13,7 @@ public sealed interface Event {
     record Sold(Building building, int refund) implements Event {
     }
 
-    /** A vehicle left the factory, or the carryall set it down. */
+    /** A vehicle left the factory, or the airlifter set it down. */
     record Deployed(Unit unit) implements Event {
     }
 
@@ -34,11 +34,11 @@ public sealed interface Event {
     record Collapsed(Building building) implements Event {
     }
 
-    /** A harvester put spice into the refinery. */
+    /** A harvester put crystal into the refinery. */
     record Unloaded(Unit harvester, int credits) implements Event {
     }
 
-    /** More spice came home than the refineries and silos store. */
+    /** More crystal came home than the refineries and silos store. */
     record StorageFull(Side side) implements Event {
     }
 
@@ -46,10 +46,10 @@ public sealed interface Event {
     record UnderAttack(Side side, double x, double y) implements Event {
     }
 
-    record WormRose(double x, double y) implements Event {
+    record BurrowerRose(double x, double y) implements Event {
     }
 
-    record WormAte(Unit unit) implements Event {
+    record BurrowerAte(Unit unit) implements Event {
     }
 
     /** The game is over: {@code winner} has the only buildings left. */
