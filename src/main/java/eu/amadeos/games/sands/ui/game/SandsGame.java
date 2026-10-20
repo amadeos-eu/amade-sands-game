@@ -382,6 +382,8 @@ public final class SandsGame implements Arena {
         private final Selection<Unit> selection = new Selection<>();
         private final BoxSelect box = new BoxSelect();
         private Building building;
+        /** An enemy vehicle the player clicked on, to see its health; it takes no orders. */
+        private Unit watched;
         private boolean vehicles;
         /** The building the yard has ready, while the player looks for a place for it. */
         private BuildingType placing;
@@ -427,7 +429,8 @@ public final class SandsGame implements Arena {
                 }
             }
             if (controls.wasPressed(Action.PAUSE)
-                    || controls.wasPressed(Action.BACK) && placing == null && selection.isEmpty() && building == null) {
+                    || controls.wasPressed(Action.BACK) && placing == null && selection.isEmpty() && building == null
+                    && watched == null) {
                 scenes.push(new PauseScene(this));
                 return;
             }
@@ -446,6 +449,7 @@ public final class SandsGame implements Arena {
             for (Event event : game.events()) tell(event);
             selection.keepOnly(Unit::alive);
             if (building != null && game.thing(building.id()) == null) building = null;
+            if (watched != null && (!watched.alive() || !game.visible(PLAYER, watched))) watched = null;
             if (placing != null && game.house(PLAYER).yard().ready() != placing) placing = null;
             terrain.update(game);
             FogOfWar fog = game.house(PLAYER).fog();
@@ -520,6 +524,7 @@ public final class SandsGame implements Arena {
                 else {
                     selection.clear();
                     building = null;
+                    watched = null;
                 }
             }
             if (controls.wasPressed(Action.SAVE)) {
@@ -562,6 +567,7 @@ public final class SandsGame implements Arena {
                 } else if (selection.recall(number)) {
                     group = number;
                     building = null;
+                    watched = null;
                     effects.tick();
                 }
             }
@@ -603,15 +609,23 @@ public final class SandsGame implements Arena {
                     if (unit != null && unit.side() == PLAYER) {
                         selection.click(unit, adding);
                         building = null;
+                        watched = null;
                         group = 0;
                         effects.yes();
+                    } else if (unit != null && game.visible(PLAYER, unit)) {
+                        selection.clear();
+                        building = null;
+                        watched = unit;
+                        effects.tick();
                     } else if (there != null && (there.side() == PLAYER || game.visible(PLAYER, there))) {
                         selection.clear();
                         building = there;
+                        watched = null;
                         effects.tick();
                     } else if (!adding) {
                         selection.clear();
                         building = null;
+                        watched = null;
                     }
                 }
                 case BoxSelect.Box picked -> {
@@ -622,6 +636,7 @@ public final class SandsGame implements Arena {
                     if (!inside.isEmpty() || !adding) selection.pick(inside, adding);
                     if (!inside.isEmpty()) {
                         building = null;
+                        watched = null;
                         group = 0;
                         effects.yes();
                     }
@@ -644,6 +659,7 @@ public final class SandsGame implements Arena {
             List<Unit> chosen = selection.all();
             if (chosen.isEmpty()) {
                 building = null;
+                watched = null;
                 return;
             }
             int col = (int) Math.floor(wx / Field.TILE);
@@ -709,6 +725,7 @@ public final class SandsGame implements Arena {
                     && building.type().buildable()) {
                 game.sell(building);
                 building = null;
+                watched = null;
             } else if (Hud.MENU.contains(mx, my)) {
                 scenes.push(new PauseScene(this));
             } else {
@@ -745,6 +762,7 @@ public final class SandsGame implements Arena {
                 placing = type;
                 selection.clear();
                 building = null;
+                watched = null;
                 effects.tick();
             } else if (yard.isEmpty() && yard.ready() == null && game.build(PLAYER, type)) {
                 effects.tick();
@@ -799,7 +817,7 @@ public final class SandsGame implements Arena {
         }
 
         SandsPainter.Marks marks() {
-            return new SandsPainter.Marks(selection.all(), building, placing, place, placement,
+            return new SandsPainter.Marks(selection.all(), building, watched, placing, place, placement,
                     box.dragging() ? box.box() : null, order, orderAge,
                     influence ? game.commander(PLAYER.enemy()) : null);
         }
@@ -812,7 +830,7 @@ public final class SandsGame implements Arena {
         @Override
         public void renderOverlay(Graphics2D g, double alpha) {
             hud.panel(g, game, PLAYER, minimap, camera,
-                    new Hud.View(vehicles, selection.all(), building, group, mouse.x(), mouse.y()), alpha);
+                    new Hud.View(vehicles, selection.all(), building, watched, group, mouse.x(), mouse.y()), alpha);
             hud.corner(g, Hud.clock((int) game.time()), 12);
             if (influence) hud.corner(g, msg.get("play.influence"), 24);
             hud.message(g, message, messageShown, messageColour);
@@ -848,6 +866,10 @@ public final class SandsGame implements Arena {
 
         Building building() {
             return building;
+        }
+
+        Unit watched() {
+            return watched;
         }
 
         String message() {
