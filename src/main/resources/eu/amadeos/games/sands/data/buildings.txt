@@ -1,0 +1,94 @@
+# The buildings of Sands. Change a number, start the game again, play.
+#
+#   size      width and height in tiles
+#   health    hit points; armour as for the units (units.txt)
+#   cost      credits, paid while the construction yard builds it; a building without a cost is not built,
+#             a map places it
+#   seconds   how long that takes at full power
+#   power     what a windtrap makes; every other building uses power (a negative number); 0 if not given
+#   sight     how far it sees, in tiles
+#   storage   credits of spice it stores
+#   needs     the buildings its side must have before the yard builds it (none if not given)
+#   yard      yes for the construction yard, which builds the buildings
+#   factory   yes for the factory, which makes the vehicles
+#   radar     yes for the outpost: with enough power, its side sees the minimap
+#   dock      the column of the pad a harvester unloads on; a building with a dock comes with a harvester
+#   weapon    as for the units: a turret fires on enemies in range
+
+building yard
+  size 4 4
+  health 1400
+  armour 0.3
+  sight 6
+  storage 1000
+  yard yes
+
+building windtrap
+  size 2 2
+  health 400
+  armour 0.2
+  cost 300
+  seconds 12
+  power 100
+  sight 3
+  needs yard
+
+building refinery
+  size 4 2
+  health 900
+  armour 0.25
+  cost 400
+  seconds 20
+  power -30
+  sight 4
+  storage 1000
+  needs windtrap
+  dock 3
+
+building silo
+  size 2 2
+  health 300
+  armour 0.2
+  cost 150
+  seconds 8
+  power -5
+  sight 3
+  storage 1500
+  needs refinery
+
+building outpost
+  size 2 2
+  health 500
+  armour 0.25
+  cost 400
+  seconds 15
+  power -30
+  sight 9
+  needs windtrap
+  radar yes
+
+building factory
+  size 4 3
+  health 1000
+  armour 0.3
+  cost 600
+  seconds 24
+  power -30
+  sight 4
+  needs refinery
+  factory yes
+
+building turret
+  size 1 1
+  health 450
+  armour 0.45
+  cost 250
+  seconds 12
+  power -10
+  sight 6
+  needs outpost
+  weapon gun
+  range 5.5
+  damage 26
+  reload 1.3
+  shot 18

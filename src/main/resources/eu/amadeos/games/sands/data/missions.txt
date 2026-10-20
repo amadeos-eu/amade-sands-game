@@ -1,0 +1,44 @@
+# What each mission gives the two houses, and how the computer plays.
+#
+#   map       the map in the folder maps, made in Tiled (see the README)
+#   credits   the player's credits at the start
+#   enemy     the computer's credits at the start
+#   worm      yes if a sand worm hunts on the open sand
+#   attack    seconds before the computer's first attack
+#   every     seconds between its attacks after that
+#   army      vehicles in its first attack; each attack after brings grows more
+#   grows
+#   turrets   how many turrets it builds at most
+
+mission 1
+  map map1.tmx
+  credits 1500
+  enemy 1000
+  worm no
+  attack 420
+  every 240
+  army 3
+  grows 1
+  turrets 2
+
+mission 2
+  map map2.tmx
+  credits 1500
+  enemy 1500
+  worm yes
+  attack 330
+  every 210
+  army 4
+  grows 2
+  turrets 4
+
+mission 3
+  map map3.tmx
+  credits 1200
+  enemy 2500
+  worm yes
+  attack 260
+  every 180
+  army 6
+  grows 2
+  turrets 6
