@@ -45,9 +45,9 @@ final class SandsPainter {
      * What the player is doing, for the marks on the map; all of it may be {@code null} or empty. {@code box}
      * is in world units.
      */
-    record Marks(Collection<Unit> chosen, Building building, BuildingType placing, Cell place, Game.Placement result,
+    record Marks(Collection<Unit> chosen, Building building, Unit watched, BuildingType placing, Cell place, Game.Placement result,
                  BoxSelect.Box box, Cell order, double orderAge, Commander influence) {
-        static final Marks NONE = new Marks(List.of(), null, null, null, null, null, null, 0, null);
+        static final Marks NONE = new Marks(List.of(), null, null, null, null, null, null, null, 0, null);
     }
 
     static final double FLASH_SECONDS = 0.07;
@@ -272,6 +272,13 @@ final class SandsPainter {
             double y = unit.y(alpha);
             Art.brackets(g, x, y, size);
             Art.healthBar(g, x, y - size / 2 - 4.5, size - 2, unit.health() / unit.maxHealth());
+        }
+        Unit watched = marks.watched();
+        if (watched != null && watched.alive()) {
+            double size = Math.max(10, watched.radius() * 2 * Art.U + 6);
+            Art.brackets(g, watched.x(alpha), watched.y(alpha), size);
+            Art.healthBar(g, watched.x(alpha), watched.y(alpha) - size / 2 - 4.5, size - 2,
+                    watched.health() / watched.maxHealth());
         }
         Building building = marks.building();
         if (building != null && building.health() > 0) {

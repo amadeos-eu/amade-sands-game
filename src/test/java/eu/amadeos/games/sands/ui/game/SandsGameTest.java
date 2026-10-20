@@ -5,6 +5,7 @@ import eu.amadeos.gameengine.audio.Mixer;
 import eu.amadeos.gameengine.input.Keyboard;
 import eu.amadeos.gameengine.input.Mouse;
 import eu.amadeos.gameengine.save.SaveFile;
+import eu.amadeos.gameengine.tiled.TiledMap;
 import eu.amadeos.gameengine.tile.Cell;
 import eu.amadeos.games.sands.bootstrap.SandsModule;
 import eu.amadeos.games.sands.domain.Building;
@@ -12,6 +13,7 @@ import eu.amadeos.games.sands.domain.BuildingType;
 import eu.amadeos.games.sands.domain.Field;
 import eu.amadeos.games.sands.domain.Game;
 import eu.amadeos.games.sands.domain.Ground;
+import eu.amadeos.games.sands.domain.Level;
 import eu.amadeos.games.sands.domain.Cheat;
 import eu.amadeos.games.sands.domain.Side;
 import eu.amadeos.games.sands.domain.Unit;
@@ -164,6 +166,32 @@ class SandsGameTest {
         mouse.released(MouseEvent.BUTTON1);
         steps(1);
         assertEquals(Set.copyOf(mine), Set.copyOf(play.selection().all()), "the box takes all the player's in view");
+    }
+
+    @Test
+    void aClickOnAnEnemyVehicleShowsItsHealthButDoesNotChooseIt() {
+        // Mission 1 with an enemy tank moved next to the player's trikes.
+        TiledMap map = TiledMap.load(Level.class, Level.FOLDER + "watch.tmx");
+        Level level = Level.read(game.rules().mission(1), map, game.rules());
+        SandsGame.PlayScene play = game.play(new Game(level, game.rules(), 1, Set.of(Side.RED)));
+        steps(2);
+        Unit tank = play.game().units().stream().filter(u -> u.side() == Side.RED && u.type().id().equals("tank"))
+                .filter(u -> play.game().visible(Side.BLUE, u)).findFirst().orElseThrow();
+        over(play, tank.x(), tank.y());
+        click(MouseEvent.BUTTON1);
+        assertSame(tank, play.watched());
+        assertTrue(play.selection().isEmpty(), "an enemy is never chosen");
+        BufferedImage image = new BufferedImage((int) Field.WIDTH, (int) Field.HEIGHT, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        game.render(g, 1);
+        game.renderOverlay(g, 1);
+        g.dispose();
+
+        Unit trike = vehicles(play, "trike").getFirst();
+        over(play, trike.x(), trike.y());
+        click(MouseEvent.BUTTON1);
+        assertNull(play.watched(), "choosing one's own takes the enemy out of the panel");
+        assertEquals(List.of(trike), play.selection().all());
     }
 
     @Test

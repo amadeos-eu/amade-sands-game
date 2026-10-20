@@ -92,7 +92,7 @@ final class Hud {
     }
 
     /** What the panel shows that the game does not know: which list, the chosen ones, where the mouse is. */
-    record View(boolean vehicles, List<Unit> chosen, Building building, int group, double mouseX, double mouseY) {
+    record View(boolean vehicles, List<Unit> chosen, Building building, Unit watched, int group, double mouseX, double mouseY) {
     }
 
     // --8<-- [start:panel]
@@ -355,7 +355,7 @@ final class Hud {
     }
     // --8<-- [end:item]
 
-    /** The chosen vehicles, up to ten with their health; or the building chosen. */
+    /** The chosen vehicles, up to ten with their health; or the building chosen, or an enemy vehicle looked at. */
     private void chosen(Graphics2D g, View view, Side side) {
         g.setColor(DARK);
         g.fill(CHOSEN);
@@ -370,6 +370,17 @@ final class Hud {
             pictures.icon(building.type().id(), building.side()).draw(g, x - 2, y + 4);
             Art.healthBar(g, CHOSEN.getCenterX(), CHOSEN.y + CHOSEN.height - 7, CHOSEN.width - 12,
                     building.health() / building.maxHealth());
+            return;
+        }
+        if (view.watched() != null) {
+            Unit unit = view.watched();
+            g.drawString(msg.get("thing." + unit.type().id()), (float) x, (float) y);
+            g.setColor(new Color(0x2A241E));
+            rectangle.setRect(x - 1, y + 4, 19, 18);
+            g.fill(rectangle);
+            pictures.small(unit.type().id(), unit.side()).draw(g, x, y + 4.5);
+            Art.healthBar(g, CHOSEN.getCenterX(), CHOSEN.y + CHOSEN.height - 7, CHOSEN.width - 12,
+                    unit.health() / unit.maxHealth());
             return;
         }
         List<Unit> chosen = view.chosen();
