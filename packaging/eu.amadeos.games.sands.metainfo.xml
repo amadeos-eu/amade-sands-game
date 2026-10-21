@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata of amade-sands-game, installed as /usr/share/metainfo/eu.amadeos.games.sands.metainfo.xml.
+     amadeOS Software shows it for the installed package; a repository's appstream-generator reads it too. -->
+<component type="desktop-application">
+  <id>eu.amadeos.games.sands</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>EUPL-1.2</project_license>
+
+  <name>amadeOS Sands</name>
+
+  <summary>Harvest crystals, build a base and an army, and win a desert planet</summary>
+  <summary xml:lang="de">Kristalle ernten, Basis und Armee bauen und einen Wüstenplaneten erobern</summary>
+  <summary xml:lang="fr">Récoltez des cristaux, bâtissez base et armée et gagnez une planète désertique</summary>
+  <summary xml:lang="es">Recoja cristales, construya base y ejército y gane un planeta desierto</summary>
+  <summary xml:lang="it">Raccogli cristalli, costruisci base ed esercito e conquista un pianeta desertico</summary>
+
+  <description>
+    <p>The real-time strategy game of the amadeOS desktop: two houses on a desert planet. Harvesters gather the crystals in the sand, refineries turn them into credits, and the credits pay for wind turbines, factories, turrets and an army. The computer builds its own base and attacks in growing waves.</p>
+    <p xml:lang="de">Das Echtzeit-Strategiespiel des amadeOS-Desktops: zwei Häuser auf einem Wüstenplaneten. Erntemaschinen sammeln die Kristalle im Sand, Raffinerien machen Credits daraus, und die Credits bezahlen Windturbinen, Fabriken, Geschütztürme und eine Armee. Der Computer baut seine eigene Basis und greift in wachsenden Wellen an.</p>
+    <p xml:lang="fr">Le jeu de stratégie en temps réel du bureau amadeOS : deux maisons sur une planète désertique. Les moissonneuses récoltent les cristaux dans le sable, les raffineries en font des crédits, et les crédits paient éoliennes, usines, tourelles et une armée. L'ordinateur bâtit sa propre base et attaque par vagues croissantes.</p>
+    <p xml:lang="es">El juego de estrategia en tiempo real del escritorio amadeOS: dos casas en un planeta desierto. Las cosechadoras recogen los cristales de la arena, las refinerías los convierten en créditos y los créditos pagan turbinas eólicas, fábricas, torretas y un ejército. El ordenador construye su propia base y ataca en oleadas crecientes.</p>
+    <p xml:lang="it">Il gioco di strategia in tempo reale del desktop amadeOS: due casate su un pianeta desertico. Le mietitrici raccolgono i cristalli nella sabbia, le raffinerie li trasformano in crediti e i crediti pagano turbine eoliche, fabbriche, torrette e un esercito. Il computer costruisce la sua base e attacca a ondate crescenti.</p>
+    <ul>
+      <li>Trikes, tanks and rocket launchers</li>
+      <li xml:lang="de">Trikes, Panzer und Raketenwerfer</li>
+      <li xml:lang="fr">Trikes, chars et lance-roquettes</li>
+      <li xml:lang="es">Trikes, tanques y lanzacohetes</li>
+      <li xml:lang="it">Trike, carri armati e lanciarazzi</li>
+      <li>Minimap, power and fog of war</li>
+      <li xml:lang="de">Minikarte, Strom und Nebel des Krieges</li>
+      <li xml:lang="fr">Mini-carte, énergie et brouillard de guerre</li>
+      <li xml:lang="es">Minimapa, energía y niebla de guerra</li>
+      <li xml:lang="it">Minimappa, energia e nebbia di guerra</li>
+      <li>Save and load a battle with F5 and F9</li>
+      <li xml:lang="de">Eine Schlacht mit F5 speichern und mit F9 laden</li>
+      <li xml:lang="fr">Sauvegarder et charger une bataille avec F5 et F9</li>
+      <li xml:lang="es">Guardar y cargar una batalla con F5 y F9</li>
+      <li xml:lang="it">Salvare e caricare una battaglia con F5 e F9</li>
+      <li>Built on amade-game-engine; plays on other operating systems as well</li>
+      <li xml:lang="de">Gebaut auf amade-game-engine; läuft auch auf anderen Betriebssystemen</li>
+      <li xml:lang="fr">Construit sur amade-game-engine ; fonctionne aussi sur d'autres systèmes d'exploitation</li>
+      <li xml:lang="es">Hecho con amade-game-engine; funciona también en otros sistemas operativos</li>
+      <li xml:lang="it">Costruito su amade-game-engine; funziona anche su altri sistemi operativi</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">amade-sands-game.desktop</launchable>
+  <icon type="stock">amade-sands-game</icon>
+  <categories>
+    <category>Game</category>
+    <category>StrategyGame</category>
+  </categories>
+
+  <url type="homepage">https://github.com/datazuul/amade-sands-game</url>
+  <url type="bugtracker">https://github.com/datazuul/amade-sands-game/issues</url>
+  <developer id="eu.amadeos">
+    <name>amadeOS Project</name>
+  </developer>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>A harvester brings crystals to the refinery</caption>
+      <caption xml:lang="de">Eine Erntemaschine bringt Kristalle zur Raffinerie</caption>
+      <caption xml:lang="fr">Une moissonneuse apporte des cristaux à la raffinerie</caption>
+      <caption xml:lang="es">Una cosechadora lleva cristales a la refinería</caption>
+      <caption xml:lang="it">Una mietitrice porta cristalli alla raffineria</caption>
+      <image>https://raw.githubusercontent.com/datazuul/amade-sands-game/main/docs/screenshots/amade-sands-game.png</image>
+    </screenshot>
+  </screenshots>
+
+  <provides>
+    <binary>amade-sands-game</binary>
+  </provides>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-fantasy">moderate</content_attribute>
+  </content_rating>
+</component>
