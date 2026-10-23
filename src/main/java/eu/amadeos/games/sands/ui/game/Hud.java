@@ -26,6 +26,7 @@ import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -81,6 +82,8 @@ final class Hud {
     private final int[] grainAlpha = new int[300];
     /** What stays the same from frame to frame, drawn once: the panel, the faces of the tabs, buttons and cells. */
     private final Map<String, Sprite> faces = new HashMap<>();
+    /** The logical width of the screen; the panel is drawn for {@link Field#WIDTH} and moved to the right edge. */
+    private double width = Field.WIDTH;
 
     Hud(Messages msg, Pictures pictures) {
         this.msg = msg;
@@ -89,6 +92,10 @@ final class Hud {
             grainY[i] = (float) (grain.nextDouble() * Field.HEIGHT);
             grainAlpha[i] = grain.nextInt(10);
         }
+    }
+
+    void resize(double width) {
+        this.width = width;
     }
 
     /** What the panel shows that the game does not know: which list, the chosen ones, where the mouse is. */
@@ -101,6 +108,8 @@ final class Hud {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         House house = game.house(side);
+        AffineTransform before = g.getTransform();
+        g.translate(width - Field.WIDTH, 0);
         background(g);
         credits(g, house);
         minimap(g, game, side, minimap, camera, alpha);
@@ -123,6 +132,7 @@ final class Hud {
         button(g, STOP, msg.get("panel.stop"), !view.chosen().isEmpty(), STOP.contains(view.mouseX(), view.mouseY()));
         button(g, SELL, msg.get("panel.sell"), sell, sell && SELL.contains(view.mouseX(), view.mouseY()));
         button(g, MENU, msg.get("panel.menu"), true, MENU.contains(view.mouseX(), view.mouseY()));
+        g.setTransform(before);
     }
     // --8<-- [end:panel]
 
@@ -494,8 +504,8 @@ final class Hud {
     }
     // --8<-- [end:card]
 
-    static double cardX(int index, int count) {
-        double left = (Field.WIDTH - count * CARD_WIDTH - (count - 1) * CARD_GAP) / 2;
+    double cardX(int index, int count) {
+        double left = (width - count * CARD_WIDTH - (count - 1) * CARD_GAP) / 2;
         return left + index * (CARD_WIDTH + CARD_GAP);
     }
 
@@ -520,8 +530,8 @@ final class Hud {
         double top = 196;
         g.setFont(font(11, true));
         g.setColor(LABEL);
-        centred(g, msg.get("result.you"), Field.WIDTH / 2 + 50, top);
-        centred(g, msg.get("result.enemy"), Field.WIDTH / 2 + 130, top);
+        centred(g, msg.get("result.you"), width / 2 + 50, top);
+        centred(g, msg.get("result.enemy"), width / 2 + 130, top);
         String[] rows = {"result.harvested", "result.made", "result.destroyed", "result.lost"};
         int[][] values = {{mine.harvested(), theirs.harvested()}, {mine.made(), theirs.made()},
                 {mine.destroyed(), theirs.destroyed()}, {mine.lost(), theirs.lost()}};
@@ -530,10 +540,10 @@ final class Hud {
             g.setFont(font(11, false));
             g.setColor(CHALK);
             String label = msg.get(rows[i]);
-            g.drawString(label, (float) (Field.WIDTH / 2 - 10 - g.getFontMetrics().stringWidth(label)), (float) y);
+            g.drawString(label, (float) (width / 2 - 10 - g.getFontMetrics().stringWidth(label)), (float) y);
             g.setFont(font(11, true));
-            centred(g, Integer.toString(values[i][0]), Field.WIDTH / 2 + 50, y);
-            centred(g, Integer.toString(values[i][1]), Field.WIDTH / 2 + 130, y);
+            centred(g, Integer.toString(values[i][0]), width / 2 + 50, y);
+            centred(g, Integer.toString(values[i][1]), width / 2 + 130, y);
         }
         text(g, msg.get(won ? (last ? "won.last" : "won.next") : "lost.again"), 340, 13, false, CHALK);
     }
@@ -554,7 +564,7 @@ final class Hud {
 
     /** Darkens the screen, or {@code width} of it from the left, so text over it stays readable. */
     void veil(Graphics2D g) {
-        veil(g, Field.WIDTH);
+        veil(g, width);
     }
 
     void veil(Graphics2D g, double width) {
@@ -565,7 +575,7 @@ final class Hud {
 
     /** A line of text centred on the screen, its baseline at {@code y}, with a shadow. */
     void text(Graphics2D g, String line, double y, int size, boolean bold, Color colour) {
-        text(g, line, Field.WIDTH / 2, y, size, bold, colour);
+        text(g, line, width / 2, y, size, bold, colour);
     }
 
     void text(Graphics2D g, String line, double x, double y, int size, boolean bold, Color colour) {
