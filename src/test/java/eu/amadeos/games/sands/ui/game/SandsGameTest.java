@@ -263,6 +263,30 @@ class SandsGameTest {
         assertTrue(play.camera().y() > 0);
     }
 
+    // --8<-- [start:test-wide]
+    @Test
+    void aWideScreenShowsMoreMapAndMovesThePanelToTheRightEdge() {
+        SandsGame.PlayScene play = mission();
+        game.resize(711);                       // 16:9: 711 × 400
+        steps(2);
+        assertEquals(Field.VIEW_WIDTH + 71, play.camera().viewWidth(), 1e-9, "the map gets the extra width");
+        // The minimap is 71 units further right; once there is radar, a click on it moves the view.
+        Cheat.build(play.game(), Side.BLUE, "outpost");
+        if (play.game().house(Side.BLUE).lowPower()) Cheat.build(play.game(), Side.BLUE, "turbine");
+        steps(2);
+        double before = play.camera().x();
+        moveTo(play.minimap().x() + 71 + play.minimap().width() - 2, play.minimap().y() + play.minimap().height() - 2);
+        click(MouseEvent.BUTTON1);
+        assertNotEquals(before, play.camera().x());
+        // The mouse at the real right edge of the screen moves the map to the right.
+        play.camera().jumpTo(0, 0);
+        moveTo(710, 200);
+        double x = play.camera().x();
+        steps(10);
+        assertTrue(play.camera().x() > x);
+    }
+    // --8<-- [end:test-wide]
+
     @Test
     void f5SavesAndF9LoadsTheBattle() {
         SandsGame.PlayScene play = mission();

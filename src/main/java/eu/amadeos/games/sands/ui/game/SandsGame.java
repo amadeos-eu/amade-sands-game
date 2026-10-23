@@ -85,6 +85,9 @@ public final class SandsGame implements Arena {
     private int chosen = 1;
     private long seed = System.nanoTime();
     private GameLoop loop;
+    private GameCanvas canvas;
+    /** The logical width of the screen: {@link Field#WIDTH}, or more on a wide screen. */
+    private double width = Field.WIDTH;
 
     @Inject
     public SandsGame(Keyboard keyboard, Mouse mouse, Messages msg, Progress progress, SaveSlot slot, Mixer mixer) {
@@ -118,6 +121,8 @@ public final class SandsGame implements Arena {
 
     /** Starts the loop; the canvas draws the scenes' worlds and then their overlays. */
     public void start(GameCanvas canvas) {
+        this.canvas = canvas;
+        canvas.setMaxLogicalWidth(Field.MAX_WIDTH);
         loop = new GameLoop(UPDATES_PER_SECOND, FRAMES_PER_SECOND, this::update, canvas::render);
         loop.start();
     }
@@ -129,6 +134,7 @@ public final class SandsGame implements Arena {
     void update(double seconds) {
         keyboard.poll();
         mouse.poll();
+        if (canvas != null) resize(canvas.logicalWidth());
         scenes.update(seconds);
     }
 
@@ -167,6 +173,17 @@ public final class SandsGame implements Arena {
     private void run(Runnable command) {
         if (loop != null && loop.running()) loop.post(command);
         else command.run();
+    }
+
+    /** A new screen width: the map shows more or less, the panel moves to the right edge. */
+    void resize(double width) {
+        this.width = width;
+        hud.resize(width);
+    }
+
+    /** How much wider than {@link Field#WIDTH} the screen is: the panel sits that much further right. */
+    private double extra() {
+        return width - Field.WIDTH;
     }
 
     // ---- for tests and screenshots ---------------------------------------------------------------
@@ -217,12 +234,14 @@ public final class SandsGame implements Arena {
         return terrain;
     }
 
-    private static Camera camera(Level level) {
-        return new Camera(Field.VIEW_WIDTH, Field.VIEW_HEIGHT, level.width() * Field.TILE, level.height() * Field.TILE);
+    private Camera camera(Level level) {
+        return new Camera(Field.VIEW_WIDTH + extra(), Field.VIEW_HEIGHT, level.width() * Field.TILE,
+                level.height() * Field.TILE);
     }
 
-    private static Camera wideCamera(Level level) {
-        return new Camera(Field.WIDTH, Field.HEIGHT, level.width() * Field.TILE, level.height() * Field.TILE);
+    /** The view of the whole screen, behind the title and the choice. */
+    private Camera wideCamera(Level level) {
+        return new Camera(width, Field.HEIGHT, level.width() * Field.TILE, level.height() * Field.TILE);
     }
 
     /** The first map with both sides played by the computer; the view drifts across it. */
@@ -257,6 +276,7 @@ public final class SandsGame implements Arena {
             }
             terrain(demo);
             if (demo.phase() != Game.Phase.PLAYING || time > TITLE_SECONDS) restart();
+            camera.resize(width, Field.HEIGHT);
             double wayX = camera.worldWidth() - camera.viewWidth();
             double along = wayX <= 0 ? 0 : (time * TITLE_SPEED) % (2 * wayX);
             double x = along < wayX ? along : 2 * wayX - along;
@@ -334,7 +354,7 @@ public final class SandsGame implements Arena {
         int cardAt(double x, double y) {
             if (Double.isNaN(x) || y < Hud.CARD_TOP || y > Hud.CARD_TOP + Hud.CARD_HEIGHT) return 0;
             for (int i = 0; i < levels.size(); i++) {
-                double left = Hud.cardX(i, levels.size());
+                double left = hud.cardX(i, levels.size());
                 if (x >= left && x < left + Hud.CARD_WIDTH) return i + 1;
             }
             return 0;
@@ -345,6 +365,7 @@ public final class SandsGame implements Arena {
             Level level = levels.get(chosen - 1);
             Game field = fields.computeIfAbsent(chosen, n -> new Game(level, rules, 1, Set.of()));
             Camera camera = cameras.computeIfAbsent(chosen, n -> wideCamera(level));
+            camera.resize(width, Field.HEIGHT);
             double wayX = camera.worldWidth() - camera.viewWidth();
             double along = wayX <= 0 ? 0 : (time * TITLE_SPEED) % (2 * wayX);
             camera.jumpTo(camera.viewWidth() / 2 + (along < wayX ? along : 2 * wayX - along), camera.worldHeight() / 2);
@@ -357,7 +378,7 @@ public final class SandsGame implements Arena {
             hud.text(g, msg.get("select.title"), 70, 30, true, Hud.AMBER);
             for (int i = 0; i < levels.size(); i++) {
                 int number = i + 1;
-                hud.card(g, Hud.cardX(i, levels.size()), Hud.CARD_TOP, number, number <= progress.open(),
+                hud.card(g, hud.cardX(i, levels.size()), Hud.CARD_TOP, number, number <= progress.open(),
                         number == chosen, progress);
             }
             hud.text(g, msg.get("select.keys"), 330, 12, false, Hud.CHALK);
@@ -407,7 +428,7 @@ public final class SandsGame implements Arena {
         PlayScene(Game battle) {
             game = battle;
             Level level = battle.level();
-            camera = SandsGame.camera(level);
+            camera = SandsGame.this.camera(level);
             terrain = SandsGame.this.terrain(battle);
             minimap = new Minimap(Hud.MINIMAP.x, Hud.MINIMAP.y, Hud.MINIMAP.width, Hud.MINIMAP.height, level.width(),
                     level.height(), Field.TILE);
@@ -435,6 +456,7 @@ public final class SandsGame implements Arena {
                 return;
             }
             if (controls.wasPressed(Action.LOAD) && load()) return;
+            camera.resize(Field.VIEW_WIDTH + extra(), Field.VIEW_HEIGHT);
             input(seconds);
             step(seconds);
             orderAge += seconds;
@@ -513,7 +535,9 @@ public final class SandsGame implements Arena {
         private void input(double seconds) {
             double mx = mouse.x();
             double my = mouse.y();
-            boolean onMap = !Double.isNaN(mx) && mx < Field.VIEW_WIDTH;
+            boolean onMap = !Double.isNaN(mx) && mx < Field.VIEW_WIDTH + extra();
+            // The panel is laid out for the narrowest screen and moved to the right edge: so is the mouse.
+            double px = mx - extra();
             double wx = camera.worldX(mx);
             double wy = camera.worldY(my);
             boolean adding = keyboard.isDown(KeyEvent.VK_SHIFT);
@@ -539,14 +563,14 @@ public final class SandsGame implements Arena {
             placing(onMap, wx, wy);
             if (mouse.wasPressed(MouseEvent.BUTTON1)) {
                 if (onMap) leftPress(wx, wy);
-                else panelClick(mx, my, false);
+                else panelClick(px, my, false);
             }
             if (mouse.wasPressed(MouseEvent.BUTTON3)) {
                 if (onMap) command(wx, wy, ctrl);
-                else panelClick(mx, my, true);
+                else panelClick(px, my, true);
             }
             if (minimapDrag && mouse.isDown(MouseEvent.BUTTON1) && !Double.isNaN(mx)) {
-                camera.jumpTo(minimap.worldX(Math.clamp(mx, minimap.x(), minimap.x() + minimap.width())),
+                camera.jumpTo(minimap.worldX(Math.clamp(px, minimap.x(), minimap.x() + minimap.width())),
                         minimap.worldY(Math.clamp(my, minimap.y(), minimap.y() + minimap.height())));
             }
             if (!mouse.isDown(MouseEvent.BUTTON1)) minimapDrag = false;
@@ -803,7 +827,7 @@ public final class SandsGame implements Arena {
             double dy = controls.axis(Action.UP, Action.DOWN) * PAN_SPEED * seconds;
             if (mouse.isInside() && !dragging && !box.dragging() && !minimapDrag && !Double.isNaN(mx)) {
                 if (mx < EDGE) dx -= PAN_SPEED * seconds;
-                if (mx > Field.WIDTH - EDGE) dx += PAN_SPEED * seconds;
+                if (mx > width - EDGE) dx += PAN_SPEED * seconds;
                 if (my < EDGE) dy -= PAN_SPEED * seconds;
                 if (my > Field.HEIGHT - EDGE) dy += PAN_SPEED * seconds;
             }
@@ -830,7 +854,8 @@ public final class SandsGame implements Arena {
         @Override
         public void renderOverlay(Graphics2D g, double alpha) {
             hud.panel(g, game, PLAYER, minimap, camera,
-                    new Hud.View(vehicles, selection.all(), building, watched, group, mouse.x(), mouse.y()), alpha);
+                    new Hud.View(vehicles, selection.all(), building, watched, group, mouse.x() - extra(), mouse.y()),
+                    alpha);
             hud.corner(g, Hud.clock((int) game.time()), 12);
             if (influence) hud.corner(g, msg.get("play.influence"), 24);
             hud.message(g, message, messageShown, messageColour);
@@ -933,7 +958,7 @@ public final class SandsGame implements Arena {
         }
 
         int rowAt(double x, double y) {
-            if (Double.isNaN(x) || Math.abs(x - Field.WIDTH / 2) > 90) return -1;
+            if (Double.isNaN(x) || Math.abs(x - width / 2) > 90) return -1;
             int row = (int) Math.floor((y - PAUSE_TOP + PAUSE_ROW * 0.7) / PAUSE_ROW);
             return row >= 0 && row < Choice.values().length ? row : -1;
         }
