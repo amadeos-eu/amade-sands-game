@@ -51,8 +51,8 @@
     <category>StrategyGame</category>
   </categories>
 
-  <url type="homepage">https://github.com/datazuul/amade-sands-game</url>
-  <url type="bugtracker">https://github.com/datazuul/amade-sands-game/issues</url>
+  <url type="homepage">https://github.com/amadeos-eu/amade-sands-game</url>
+  <url type="bugtracker">https://github.com/amadeos-eu/amade-sands-game/issues</url>
   <developer id="eu.amadeos">
     <name>amadeOS Project</name>
   </developer>
@@ -64,7 +64,7 @@
       <caption xml:lang="fr">Une moissonneuse apporte des cristaux à la raffinerie</caption>
       <caption xml:lang="es">Una cosechadora lleva cristales a la refinería</caption>
       <caption xml:lang="it">Una mietitrice porta cristalli alla raffineria</caption>
-      <image>https://raw.githubusercontent.com/datazuul/amade-sands-game/main/docs/screenshots/amade-sands-game.png</image>
+      <image>https://raw.githubusercontent.com/amadeos-eu/amade-sands-game/main/docs/screenshots/amade-sands-game.png</image>
     </screenshot>
   </screenshots>
 
