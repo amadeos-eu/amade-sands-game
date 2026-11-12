@@ -88,8 +88,12 @@ tasks.register('deb') {
         }
 
         def launcher = new File(binDir, 'amade-sands-game')
+        // The options all amadeOS programs share (heap, garbage collector) come first from the argument file
+        // amadeos-session installs; the options after it win over them.
         launcher.text = """#!/bin/sh
-exec /usr/bin/java -jar /opt/amade-sands-game/amade-sands-game.jar "\$@"
+OPTIONS=/etc/amadeos/java/game.options
+[ -r "\$OPTIONS" ] || OPTIONS=/dev/null
+exec /usr/bin/java "@\$OPTIONS" -jar /opt/amade-sands-game/amade-sands-game.jar "\$@"
 """
         launcher.setExecutable(true, false)
 
@@ -118,7 +122,7 @@ Version: ${debVersion}
 Section: games
 Priority: optional
 Architecture: all
-Depends: openjdk-25-jre | java-runtime (>= 25)
+Depends: openjdk-25-jre | java-runtime (>= 25), amadeos-java-options
 Maintainer: amadeOS Project <developers@datazuul.com>
 Description: Real-time strategy game for amadeOS
  Harvest crystal on a desert planet, build a base of turbines, refineries
